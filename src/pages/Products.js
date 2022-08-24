@@ -1,16 +1,12 @@
 import { filter } from 'lodash';
-import { sentenceCase } from 'change-case';
 import { useState, useEffect } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 // material
 import {
   Card,
   Table,
   Stack,
-  Avatar,
   Button,
-  Checkbox,
   TableRow,
   TableBody,
   TableCell,
@@ -19,26 +15,30 @@ import {
   TableContainer,
   TablePagination,
 } from '@mui/material';
+
+import AppToast from '../myTool/AppToast';
+import ProductDialog from '../dialog/ProductDialog';
+import ProductEditDialog from '../dialog/ProductEditDialog';
+
 // components
 import Page from '../components/Page';
-import Label from '../components/Label';
 import Scrollbar from '../components/Scrollbar';
 import Iconify from '../components/Iconify';
 import SearchNotFound from '../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../sections/@dashboard/user';
 // mock
-import { getAllProductAPI } from '../components/services/index';
+import { deleteProductAPI, getAllProductAPI } from '../components/services/index';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'productId', label: 'productId', alignRight: false },
-  { id: 'name', label: 'name', alignRight: false },
-  { id: 'quantity', label: 'quantity', alignRight: false },
+  { id: 'productId', label: 'Product ID', alignRight: false },
+  { id: 'name', label: 'Name', alignRight: false },
+  { id: 'quantity', label: 'Quantity', alignRight: false },
 
-  { id: 'price', label: 'price', alignRight: false },
-  { id: 'manufacturerId', label: 'manufacturerId', alignRight: false },
-  { id: 'productTypeId', label: 'productTypeId', alignRight: false },
+  { id: 'price', label: 'Price', alignRight: false },
+  { id: 'manufacturerId', label: 'Manufacturer', alignRight: false },
+  { id: 'productTypeId', label: 'Product Type', alignRight: false },
 ];
 
 // ----------------------------------------------------------------------
@@ -73,19 +73,17 @@ function applySortFilter(array, comparator, query) {
 }
 
 export default function User() {
-  const navigate = useNavigate();
   const [page, setPage] = useState(0);
-
   const [order, setOrder] = useState('asc');
-
   const [selected, setSelected] = useState([]);
-
   const [orderBy, setOrderBy] = useState('name');
-
   const [filterName, setFilterName] = useState('');
-
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openDialogEdit, setOpenDialogEdit] = useState(false);
+  const [openToast, setOpenToast] = useState(false);
+  const [contentToast, setContentToast] = useState('');
+  const [severity, setSeverity] = useState('');
   const [listProduct, setListProduct] = useState([
     {
       productId: '1',
@@ -104,10 +102,29 @@ export default function User() {
       },
     },
   ]);
+  const [currentProduct, setCurrentProduct] = useState({});
+
+  const deleteAPI = async (id) => {
+    try {
+      const res = await deleteProductAPI(id);
+      if (res.status === 200) {
+        setContentToast(res?.data);
+        setSeverity('success');
+        setOpenToast(true);
+        getAllProduct();
+      } else {
+        setContentToast(res?.data);
+        setSeverity('error');
+        setOpenToast(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const getAllProduct = async () => {
     try {
       const res = await getAllProductAPI();
-      // const temp = res?.data?.map((e) => e?.ownerId);
       setListProduct(res?.data);
     } catch (error) {
       console.log(error);
@@ -118,13 +135,6 @@ export default function User() {
     getAllProduct();
   }, []);
 
-  // useEffect(() => {
-  //   async function loadListProduct() {
-  //     const res = await axios.get('http://localhost:3000/api/v1/products');
-  //     setListProduct(res.data);
-  //   }
-  //   loadListProduct();
-  // }, []);
   const handleChangeStatus = (id) => {
     const temp = listProduct.filter((e) => e.id === id);
     const tempArr = listProduct.filter((e) => e.id !== id);
@@ -156,21 +166,6 @@ export default function User() {
     setSelected([]);
   };
 
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
-    }
-    setSelected(newSelected);
-  };
-
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -185,10 +180,14 @@ export default function User() {
   };
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - listProduct.length) : 0;
-
   const filteredUsers = applySortFilter(listProduct, getComparator(order, orderBy), filterName);
-
   const isUserNotFound = filteredUsers.length === 0;
+
+  // -------------------------------------------------------------------------------------------------------------
+
+  const handleAddProduct = () => {
+    setOpenDialog(true);
+  };
 
   return (
     <Page title="Product">
@@ -200,10 +199,11 @@ export default function User() {
           <Button
             variant="contained"
             component={RouterLink}
-            to="/dashboard/addProduct"
+            to="#"
             startIcon={<Iconify icon="eva:plus-fill" />}
+            onClick={handleAddProduct}
           >
-            New product
+            Add New Product
           </Button>
         </Stack>
 
@@ -238,24 +238,32 @@ export default function User() {
                         selected={isItemSelected}
                         aria-checked={isItemSelected}
                       >
-                        <TableCell padding="checkbox">
+                        {/* <TableCell padding="checkbox">
                           <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, name)} />
-                        </TableCell>
+                        </TableCell> */}
 
+                        <TableCell align="left" />
                         <TableCell align="left">{productId}</TableCell>
                         <TableCell align="left">{name}</TableCell>
                         <TableCell align="left">{quantity}</TableCell>
                         <TableCell align="left">{price}</TableCell>
                         <TableCell align="left">{manufacturerId?.manufacturerName}</TableCell>
-                        {/* <TableCell align="left" onClick={() => handleChangeStatus(id)}>
-                          {status ? 'xuat' : 'nhap'}
-                        </TableCell> */}
                         <TableCell align="left">{productTypeId?.productTypeName}</TableCell>
-                        {/* <Button>123</Button> */}
-
-                        {/* <TableCell align="right">
-                          <UserMoreMenu id={id} />
-                        </TableCell> */}
+                        <TableCell align="right">
+                          <UserMoreMenu
+                            id={productId}
+                            name={name}
+                            entity={row}
+                            type={'sản phẩm'}
+                            deleteAPI={deleteAPI}
+                            setSeverity={setSeverity}
+                            setOpenToast={setOpenToast}
+                            setOpenDialog={setOpenDialog}
+                            setContentToast={setContentToast}
+                            setOpenDialogEdit={setOpenDialogEdit}
+                            setCurrentEntity={setCurrentProduct}
+                          />
+                        </TableCell>
                       </TableRow>
                     );
                   })}
@@ -290,6 +298,32 @@ export default function User() {
           />
         </Card>
       </Container>
+      <ProductDialog
+        openDialog={openDialog}
+        setOpenDialog={setOpenDialog}
+        getAllProduct={getAllProduct}
+        setContentToast={setContentToast}
+        setSeverity={setSeverity}
+        setOpenToast={setOpenToast}
+      />
+      <ProductEditDialog
+        product={currentProduct}
+        openDialog={openDialogEdit}
+        setOpenDialog={setOpenDialogEdit}
+        getAllProduct={getAllProduct}
+        setContentToast={setContentToast}
+        setSeverity={setSeverity}
+        setOpenToast={setOpenToast}
+      />
+      <AppToast
+        content={contentToast}
+        type={0}
+        isOpen={openToast}
+        severity={severity}
+        callback={() => {
+          setOpenToast(false);
+        }}
+      />
     </Page>
   );
 }

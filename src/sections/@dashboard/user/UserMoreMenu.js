@@ -1,26 +1,52 @@
 import { useRef, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 // material
-import { Menu, MenuItem, IconButton, ListItemIcon, ListItemText } from '@mui/material';
-import axios from 'axios';
+import {
+  Menu,
+  MenuItem,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
+
 import Iconify from '../../../components/Iconify';
+import { deleteUserAPI } from '../../../components/services/index';
 
 // ----------------------------------------------------------------------
 
-export default function UserMoreMenu({ id }) {
+export default function UserMoreMenu(props) {
+  const { id, name, type, deleteAPI, setOpenDialogEdit, entity, setCurrentEntity } = props;
   const ref = useRef(null);
+  const [open, setOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
+
+  const handleOpenToast = () => {
+    setOpen(true);
+  };
+
+  const handleOk = () => {
+    handleDelete(id);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleEdit = () => {
+    setCurrentEntity(entity);
+    setOpenDialogEdit(true);
+  };
 
   const handleDelete = (id) => {
-    async function deleteProduct() {
-      const res = await axios.delete(`http://localhost:3000/api/v1/products/${id}`);
-      if (res.data.acknowledged === true) {
-        navigate('/dashboard/products');
-      }
-    }
-    deleteProduct();
+    deleteAPI(id);
   };
+
   return (
     <>
       <IconButton ref={ref} onClick={() => setIsOpen(true)}>
@@ -41,24 +67,35 @@ export default function UserMoreMenu({ id }) {
           <ListItemIcon>
             <Iconify icon="eva:trash-2-outline" width={24} height={24} />
           </ListItemIcon>
-          <ListItemText
-            primary="Delete"
-            onClick={() => handleDelete(id)}
-            primaryTypographyProps={{ variant: 'body2' }}
-          />
+          <ListItemText primary="Delete" onClick={handleOpenToast} primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
 
         <MenuItem component={RouterLink} to="#" sx={{ color: 'text.secondary' }}>
           <ListItemIcon>
             <Iconify icon="eva:edit-fill" width={24} height={24} />
           </ListItemIcon>
-          <ListItemText
-            primary="Edit"
-            onClick={() => navigate(`/dashboard/updateProduct?id=${id}`)}
-            primaryTypographyProps={{ variant: 'body2' }}
-          />
+          <ListItemText primary="Edit" onClick={handleEdit} primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
       </Menu>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Bạn chắc chắn muốn xóa {type} {name} không?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Hủy</Button>
+          <Button onClick={handleOk} autoFocus>
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
