@@ -30,17 +30,11 @@ export default function UserListHead({ order, orderBy, headLabel }) {
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox">
-          {/* <Checkbox
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-          /> */}
-        </TableCell>
+        <TableCell padding="checkbox" />
         {headLabel.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.alignRight ? 'right' : 'left'}
+            align={headCell.alignRight ? 'center' : 'center'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             {headCell.label}

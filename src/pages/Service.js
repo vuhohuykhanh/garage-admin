@@ -21,6 +21,7 @@ import ServiceDialog from '../dialog/ServiceDialog';
 import ServiceEditDialog from '../dialog/ServiceEditDialog';
 
 // components
+import formatMoneyWithDot from '../utils/formatMoney';
 import Page from '../components/Page';
 import Scrollbar from '../components/Scrollbar';
 import Iconify from '../components/Iconify';
@@ -165,9 +166,7 @@ export default function Service() {
   };
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - listService.length) : 0;
-
   const filteredUsers = applySortFilter(listService, getComparator(order, orderBy), filterName);
-
   const isUserNotFound = filteredUsers?.length === 0;
 
   return (
@@ -204,13 +203,20 @@ export default function Service() {
                   onSelectAllClick={handleSelectAllClick}
                 />
                 <TableBody>
-                  {listService?.map((row) => {
+                  {filteredUsers?.map((row) => {
                     const {
                       serviceId,
                       name,
                       price,
                       serviceTypeId: { serviceTypeName },
                     } = row || {};
+                    // {listService?.map((row) => {
+                    //	const {
+                    //	  serviceId,
+                    //	  name,
+                    //	  price,
+                    //	  serviceTypeId: { serviceTypeName },
+                    //	} = row || {};
                     const isItemSelected = selected.indexOf(serviceId) !== -1;
 
                     return (
@@ -225,10 +231,10 @@ export default function Service() {
                         <TableCell padding="checkbox">
                           {/* <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, name)} /> */}
                         </TableCell>
-                        <TableCell align="left">{serviceId}</TableCell>
-                        <TableCell align="left">{name}</TableCell>
-                        <TableCell align="left">{price}</TableCell>
-                        <TableCell align="left">{serviceTypeName}</TableCell>
+                        <TableCell align="center">{serviceId}</TableCell>
+                        <TableCell align="center">{name}</TableCell>
+                        <TableCell align="center">{formatMoneyWithDot(price)}</TableCell>
+                        <TableCell align="center">{serviceTypeName}</TableCell>
                         <TableCell align="right">
                           <UserMoreMenu
                             id={serviceId}

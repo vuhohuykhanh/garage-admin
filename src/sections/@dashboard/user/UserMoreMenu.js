@@ -70,12 +70,14 @@ export default function UserMoreMenu(props) {
           <ListItemText primary="Delete" onClick={handleOpenToast} primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
 
-        <MenuItem component={RouterLink} to="#" sx={{ color: 'text.secondary' }}>
-          <ListItemIcon>
-            <Iconify icon="eva:edit-fill" width={24} height={24} />
-          </ListItemIcon>
-          <ListItemText primary="Edit" onClick={handleEdit} primaryTypographyProps={{ variant: 'body2' }} />
-        </MenuItem>
+        {type !== 'người dùng' && (
+          <MenuItem component={RouterLink} to="#" sx={{ color: 'text.secondary' }}>
+            <ListItemIcon>
+              <Iconify icon="eva:edit-fill" width={24} height={24} />
+            </ListItemIcon>
+            <ListItemText primary="Edit" onClick={handleEdit} primaryTypographyProps={{ variant: 'body2' }} />
+          </MenuItem>
+        )}
       </Menu>
       <Dialog
         open={open}
@@ -83,7 +85,7 @@ export default function UserMoreMenu(props) {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">{`Xóa ${type}`}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             Bạn chắc chắn muốn xóa {type} {name} không?

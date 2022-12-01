@@ -102,7 +102,7 @@ export default function ProductDialog(props) {
         description: [
           {
             type: 'Content',
-            description,
+            description: description || '',
           },
         ],
       };

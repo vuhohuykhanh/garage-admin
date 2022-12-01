@@ -6,8 +6,10 @@ import {
   API_UPDATE_USER,
   API_DELETE_USER,
   API_GET_ALL_CART,
-  API_UPDATE_CART,
-  API_DELETE_CART,
+  API_GET_ALL_CART_DES,
+  API_GET_BY_ID_CART_DES,
+  API_ADD_CART_DES,
+  API_DELETE_CART_DES,
   API_GET_ALL_SERVICE,
   API_ADD_NEW_SERVICE,
   API_UPDATE_SERVICE,
@@ -19,6 +21,10 @@ import {
   API_GET_ALL_MANUFACTURER,
   API_GET_ALL_PRODUCT_TYPE,
   API_GET_ALL_SERVICE_TYPE,
+  API_GET_ALL_STATUS,
+  API_UPDATE_STATUS,
+  API_GET_ALL_BILL,
+  API_CREATE_BILL,
 } from './configs';
 
 export const getAllUserMainAPI = async () => {
@@ -66,7 +72,7 @@ export const deleteUserAPI = async (id) => {
   }
 };
 
-export const getAllCart = async () => {
+export const getAllCartAPI = async () => {
   try {
     const response = await axios.get(API_GET_ALL_CART);
     return response;
@@ -75,9 +81,36 @@ export const getAllCart = async () => {
   }
 };
 
-export const getDeleteCart = async (id) => {
+export const getAllCartDesAPI = async () => {
   try {
-    const response = await axios.delete(`${API_DELETE_CART}?id=${id}`);
+    const response = await axios.get(API_GET_ALL_CART_DES);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};
+
+export const getCartDescriptionAPI = async (id) => {
+  try {
+    const response = await axios.get(`${API_GET_BY_ID_CART_DES}?id=${id}`);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};
+
+export const addCarDesAPI = async (body) => {
+  try {
+    const response = await axios.patch(API_ADD_CART_DES, body);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};
+
+export const getDeleteCartAPI = async (id) => {
+  try {
+    const response = await axios.delete(`${API_DELETE_CART_DES}?id=${id}`);
     return response;
   } catch (error) {
     return error?.response?.data || error;
@@ -186,6 +219,42 @@ export const getAllProductTypeAPI = async () => {
 export const getAllServiceTypeAPI = async () => {
   try {
     const response = await axios.get(API_GET_ALL_SERVICE_TYPE);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};
+
+export const getAllStatusAPI = async () => {
+  try {
+    const response = await axios.get(API_GET_ALL_STATUS);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};
+
+export const updateStatusAPI = async (body) => {
+  try {
+    const response = await axios.patch(API_UPDATE_STATUS, body);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};
+
+export const getAllBillAPI = async () => {
+  try {
+    const response = await axios.get(API_GET_ALL_BILL);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};
+
+export const createBillAPI = async (body) => {
+  try {
+    const response = await axios.post(API_CREATE_BILL, body);
     return response;
   } catch (error) {
     return error?.response?.data || error;

@@ -21,6 +21,7 @@ import ProductDialog from '../dialog/ProductDialog';
 import ProductEditDialog from '../dialog/ProductEditDialog';
 
 // components
+import formatMoneyWithDot from '../utils/formatMoney';
 import Page from '../components/Page';
 import Scrollbar from '../components/Scrollbar';
 import Iconify from '../components/Iconify';
@@ -60,8 +61,8 @@ function getComparator(order, orderBy) {
 }
 
 function applySortFilter(array, comparator, query) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
+  const stabilizedThis = array?.map((el, index) => [el, index]);
+  stabilizedThis?.sort((a, b) => {
     const order = comparator(a[0], b[0]);
     if (order !== 0) return order;
     return a[1] - b[1];
@@ -69,7 +70,7 @@ function applySortFilter(array, comparator, query) {
   if (query) {
     return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
   }
-  return stabilizedThis.map((el) => el[0]);
+  return stabilizedThis?.map((el) => el[0]);
 }
 
 export default function User() {
@@ -136,8 +137,8 @@ export default function User() {
   }, []);
 
   const handleChangeStatus = (id) => {
-    const temp = listProduct.filter((e) => e.id === id);
-    const tempArr = listProduct.filter((e) => e.id !== id);
+    const temp = listProduct?.filter((e) => e.id === id);
+    const tempArr = listProduct?.filter((e) => e.id !== id);
     let temp1 = [];
     if (temp[0].status === true) {
       temp[0].status = false;
@@ -181,7 +182,7 @@ export default function User() {
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - listProduct.length) : 0;
   const filteredUsers = applySortFilter(listProduct, getComparator(order, orderBy), filterName);
-  const isUserNotFound = filteredUsers.length === 0;
+  const isUserNotFound = filteredUsers?.length === 0;
 
   // -------------------------------------------------------------------------------------------------------------
 
@@ -217,14 +218,14 @@ export default function User() {
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={listProduct.length}
-                  numSelected={selected.length}
+                  rowCount={listProduct?.length}
+                  numSelected={selected?.length}
                   onRequestSort={handleRequestSort}
                   onSelectAllClick={handleSelectAllClick}
                 />
 
                 <TableBody>
-                  {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                  {filteredUsers?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                     const { productId, name, quantity, price, manufacturerId, productTypeId } = row;
 
                     const isItemSelected = selected.indexOf(name) !== -1;
@@ -242,13 +243,13 @@ export default function User() {
                           <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, name)} />
                         </TableCell> */}
 
-                        <TableCell align="left" />
-                        <TableCell align="left">{productId}</TableCell>
-                        <TableCell align="left">{name}</TableCell>
-                        <TableCell align="left">{quantity}</TableCell>
-                        <TableCell align="left">{price}</TableCell>
-                        <TableCell align="left">{manufacturerId?.manufacturerName}</TableCell>
-                        <TableCell align="left">{productTypeId?.productTypeName}</TableCell>
+                        <TableCell align="center" />
+                        <TableCell align="center">{productId}</TableCell>
+                        <TableCell align="center">{name}</TableCell>
+                        <TableCell align="center">{quantity}</TableCell>
+                        <TableCell align="center">{formatMoneyWithDot(price)}</TableCell>
+                        <TableCell align="center">{manufacturerId?.manufacturerName}</TableCell>
+                        <TableCell align="center">{productTypeId?.productTypeName}</TableCell>
                         <TableCell align="right">
                           <UserMoreMenu
                             id={productId}
@@ -290,7 +291,7 @@ export default function User() {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={listProduct.length}
+            count={listProduct?.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}

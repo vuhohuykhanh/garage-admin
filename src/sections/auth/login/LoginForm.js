@@ -15,13 +15,12 @@ export default function LoginForm() {
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string().email('Email must be a valid email address').required('Email is required'),
     password: Yup.string().required('Password is required'),
   });
-
-
 
   const formik = useFormik({
     initialValues: {
@@ -39,15 +38,17 @@ export default function LoginForm() {
   };
   const handleClick = () => {
     const data = {
-      u: userName,
-      p: password,
+      username: userName,
+      password,
     };
     async function loginAdmin() {
-      const res = await axios.post('http://localhost:3000/api/v1/login', data);
+      const res = await axios.post('http://localhost:5000/api/account/signin', data);
       // console.log(res.data);
-      if (res?.data?.message === 'Auth successful' && res?.data?.role !== 'user') {
+      if (res?.status === 200 && res?.data?.role?.roleName !== 'USER') {
         localStorage.setItem('adminInfo', JSON.stringify(res.data));
-        navigate('/dashboard/app');
+        navigate('/dashboard/user');
+      } else {
+        setErrorMsg('Thất bại: Người dùng không đủ quyền đăng nhập');
       }
     }
     loginAdmin();
@@ -56,10 +57,16 @@ export default function LoginForm() {
     <FormikProvider value={formik}>
       <Form autoComplete="off" noValidate>
         <Stack spacing={3}>
-          <TextField fullWidth autoComplete="username" onChange={(e) => setUserName(e.target.value)} />
+          <TextField
+            fullWidth
+            placeholder="Tài khoản"
+            autoComplete="username"
+            onChange={(e) => setUserName(e.target.value)}
+          />
 
           <TextField
             fullWidth
+            placeholder="Mật khẩu"
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
             type={showPassword ? 'text' : 'password'}
@@ -72,10 +79,12 @@ export default function LoginForm() {
                 </InputAdornment>
               ),
             }}
-            error={Boolean(touched.password && errors.password)}
-            helperText={touched.password && errors.password}
+            // error={Boolean(touched.password && errors.password)}
+            // helperText={touched.password && errors.password}
           />
         </Stack>
+
+        <p style={{ color: 'red', fontWeight: 'bold', marginTop: '20px' }}>{errorMsg}</p>
 
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ my: 2 }}>
           <FormControlLabel

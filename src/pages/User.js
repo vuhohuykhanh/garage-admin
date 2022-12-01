@@ -175,9 +175,9 @@ export default function User() {
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
-            List User
+            Users
           </Typography>
-          <Button
+          {/* <Button
             variant="contained"
             component={RouterLink}
             to="#"
@@ -185,7 +185,7 @@ export default function User() {
             onClick={handleAddUser}
           >
             Add new user
-          </Button>
+          </Button> */}
         </Stack>
 
         <Card>
@@ -204,8 +204,10 @@ export default function User() {
                   onSelectAllClick={handleSelectAllClick}
                 />
                 <TableBody>
-                  {listUser?.map((row) => {
+                  {filteredUsers?.map((row) => {
                     const { name, idCardNumber, address, email, phoneNumber } = row || {};
+                    // {listUser?.map((row) => {
+                    //	const { name, idCardNumber, address, email, phoneNumber } = row || {};
                     const isItemSelected = selected.indexOf(phoneNumber) !== -1;
 
                     return (
@@ -220,10 +222,10 @@ export default function User() {
                         <TableCell padding="checkbox">
                           {/* <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, name)} /> */}
                         </TableCell>
-                        <TableCell align="left">{name}</TableCell>
-                        <TableCell align="left">{phoneNumber}</TableCell>
-                        <TableCell align="left">{email}</TableCell>
-                        <TableCell align="left">{address}</TableCell>
+                        <TableCell align="center">{name}</TableCell>
+                        <TableCell align="center">{phoneNumber}</TableCell>
+                        <TableCell align="center">{email}</TableCell>
+                        <TableCell align="center">{address}</TableCell>
                         <TableCell align="right">
                           <UserMoreMenu
                             id={idCardNumber}
