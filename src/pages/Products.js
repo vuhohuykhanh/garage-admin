@@ -33,13 +33,12 @@ import { deleteProductAPI, getAllProductAPI } from '../components/services/index
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'productId', label: 'Product ID', alignRight: false },
+  { id: 'accessoryId', label: 'Accessory ID', alignRight: false },
   { id: 'name', label: 'Name', alignRight: false },
   { id: 'quantity', label: 'Quantity', alignRight: false },
-
   { id: 'price', label: 'Price', alignRight: false },
-  { id: 'manufacturerId', label: 'Manufacturer', alignRight: false },
-  { id: 'productTypeId', label: 'Product Type', alignRight: false },
+  { id: 'manufacturer', label: 'Manufacturer', alignRight: false },
+  { id: 'accessoryType', label: 'Product Type', alignRight: false },
 ];
 
 // ----------------------------------------------------------------------
@@ -85,24 +84,7 @@ export default function User() {
   const [openToast, setOpenToast] = useState(false);
   const [contentToast, setContentToast] = useState('');
   const [severity, setSeverity] = useState('');
-  const [listProduct, setListProduct] = useState([
-    {
-      productId: '1',
-      name: 'Bọc ghế xe Audi - Q5',
-      image: 'https://www.honda.com.vn/o-to/san-pham',
-      description: '...',
-      quantity: 100,
-      price: 2500000,
-      manufacturerId: {
-        manufacturerId: '1',
-        manufacturerName: 'Audi',
-      },
-      productTypeId: {
-        productTypeId: '2',
-        productTypeName: 'Bọc ghế',
-      },
-    },
-  ]);
+  const [listProduct, setListProduct] = useState([]);
   const [currentProduct, setCurrentProduct] = useState({});
 
   const deleteAPI = async (id) => {
@@ -136,21 +118,21 @@ export default function User() {
     getAllProduct();
   }, []);
 
-  const handleChangeStatus = (id) => {
-    const temp = listProduct?.filter((e) => e.id === id);
-    const tempArr = listProduct?.filter((e) => e.id !== id);
-    let temp1 = [];
-    if (temp[0].status === true) {
-      temp[0].status = false;
-      temp1 = temp;
-    } else {
-      temp[0].status = true;
-      temp1 = temp;
-    }
-    const temp2 = [...temp1, ...tempArr];
-    temp2.sort((a, b) => a.id - b.id);
-    setListProduct(temp2);
-  };
+  //const handleChangeStatus = (id) => {
+  //  const temp = listProduct?.filter((e) => e.id === id);
+  //  const tempArr = listProduct?.filter((e) => e.id !== id);
+  //  let temp1 = [];
+  //  if (temp[0].status === true) {
+  //    temp[0].status = false;
+  //    temp1 = temp;
+  //  } else {
+  //    temp[0].status = true;
+  //    temp1 = temp;
+  //  }
+  //  const temp2 = [...temp1, ...tempArr];
+  //  temp2.sort((a, b) => a.id - b.id);
+  //  setListProduct(temp2);
+  //};
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -192,7 +174,7 @@ export default function User() {
 
   return (
     <Page title="Product">
-      <Container>
+      <Container maxWidth="xl">
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
             Product
@@ -226,14 +208,14 @@ export default function User() {
 
                 <TableBody>
                   {filteredUsers?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    const { productId, name, quantity, price, manufacturerId, productTypeId } = row;
+                    const { id, name, quantity, price, manufacturer, accessoryType } = row;
 
                     const isItemSelected = selected.indexOf(name) !== -1;
 
                     return (
                       <TableRow
                         hover
-                        key={productId}
+                        key={id}
                         tabIndex={-1}
                         role="checkbox"
                         selected={isItemSelected}
@@ -244,15 +226,15 @@ export default function User() {
                         </TableCell> */}
 
                         <TableCell align="center" />
-                        <TableCell align="center">{productId}</TableCell>
+                        <TableCell align="center">{id}</TableCell>
                         <TableCell align="center">{name}</TableCell>
                         <TableCell align="center">{quantity}</TableCell>
                         <TableCell align="center">{formatMoneyWithDot(price)}</TableCell>
-                        <TableCell align="center">{manufacturerId?.manufacturerName}</TableCell>
-                        <TableCell align="center">{productTypeId?.productTypeName}</TableCell>
+                        <TableCell align="center">{manufacturer?.name}</TableCell>
+                        <TableCell align="center">{accessoryType?.name}</TableCell>
                         <TableCell align="right">
                           <UserMoreMenu
-                            id={productId}
+                            id={id}
                             name={name}
                             entity={row}
                             type={'sản phẩm'}

@@ -148,21 +148,21 @@ export default function User() {
     setFilterName(event.target.value);
   };
 
-  const handleChangeStatus = (id) => {
-    const temp = listUser.filter((e) => e.id === id);
-    const tempArr = listUser.filter((e) => e.id !== id);
-    let temp1 = [];
-    if (temp[0].status === true) {
-      temp[0].status = false;
-      temp1 = temp;
-    } else {
-      temp[0].status = true;
-      temp1 = temp;
-    }
-    const temp2 = [...temp1, ...tempArr];
-    temp2.sort((a, b) => a.id - b.id);
-    setListUser(temp2);
-  };
+  //const handleChangeStatus = (id) => {
+  //  const temp = listUser.filter((e) => e.id === id);
+  //  const tempArr = listUser.filter((e) => e.id !== id);
+  //  let temp1 = [];
+  //  if (temp[0].status === true) {
+  //    temp[0].status = false;
+  //    temp1 = temp;
+  //  } else {
+  //    temp[0].status = true;
+  //    temp1 = temp;
+  //  }
+  //  const temp2 = [...temp1, ...tempArr];
+  //  temp2.sort((a, b) => a.id - b.id);
+  //  setListUser(temp2);
+  //};
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - listUser.length) : 0;
 
@@ -172,7 +172,7 @@ export default function User() {
 
   return (
     <Page title="User">
-      <Container>
+      <Container maxWidth="xl">
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
             Users
@@ -205,9 +205,8 @@ export default function User() {
                 />
                 <TableBody>
                   {filteredUsers?.map((row) => {
-                    const { name, idCardNumber, address, email, phoneNumber } = row || {};
-                    // {listUser?.map((row) => {
-                    //	const { name, idCardNumber, address, email, phoneNumber } = row || {};
+										const {user} = row || {};
+                    const { name, idCardNumber, address, email, phoneNumber } = user;
                     const isItemSelected = selected.indexOf(phoneNumber) !== -1;
 
                     return (
@@ -219,28 +218,11 @@ export default function User() {
                         selected={isItemSelected}
                         aria-checked={isItemSelected}
                       >
-                        <TableCell padding="checkbox">
-                          {/* <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, name)} /> */}
-                        </TableCell>
+												<TableCell />
                         <TableCell align="center">{name}</TableCell>
                         <TableCell align="center">{phoneNumber}</TableCell>
                         <TableCell align="center">{email}</TableCell>
                         <TableCell align="center">{address}</TableCell>
-                        <TableCell align="right">
-                          <UserMoreMenu
-                            id={idCardNumber}
-                            name={name}
-                            entity={row}
-                            type={'người dùng'}
-                            deleteAPI={deleteAPI}
-                            setSeverity={setSeverity}
-                            setOpenToast={setOpenToast}
-                            setOpenDialog={setOpenDialog}
-                            setCurrentEntity={setCurrentUser}
-                            setContentToast={setContentToast}
-                            setOpenDialogEdit={setOpenDialogEdit}
-                          />
-                        </TableCell>
                       </TableRow>
                     );
                   })}

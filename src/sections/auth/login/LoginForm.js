@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useFormik, Form, FormikProvider } from 'formik';
 // material
@@ -7,6 +7,7 @@ import { Link, Stack, Checkbox, TextField, IconButton, InputAdornment, FormContr
 import { LoadingButton } from '@mui/lab';
 import axios from 'axios';
 import Iconify from '../../../components/Iconify';
+import { loginAPI } from '../../../components/services/index';
 
 // ----------------------------------------------------------------------
 
@@ -31,27 +32,24 @@ export default function LoginForm() {
     validationSchema: LoginSchema,
   });
 
+  // console.log('errorMsg', errorMsg)
+
   const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps } = formik;
 
   const handleShowPassword = () => {
     setShowPassword((show) => !show);
   };
-  const handleClick = () => {
+  const handleClick = async () => {
     const data = {
       username: userName,
       password,
     };
-    async function loginAdmin() {
-      const res = await axios.post('http://localhost:5000/api/account/signin', data);
-      // console.log(res.data);
-      if (res?.status === 200 && res?.data?.role?.roleName !== 'USER') {
-        localStorage.setItem('adminInfo', JSON.stringify(res.data));
-        navigate('/dashboard/user');
-      } else {
-        setErrorMsg('Thất bại: Người dùng không đủ quyền đăng nhập');
-      }
+    const res = await loginAPI(data);
+    if (res?.status === 200) {
+      localStorage.setItem('adminInfo', JSON.stringify(res.data));
+      navigate('/dashboard/user');
     }
-    loginAdmin();
+		setErrorMsg(res);
   };
   return (
     <FormikProvider value={formik}>
@@ -79,8 +77,6 @@ export default function LoginForm() {
                 </InputAdornment>
               ),
             }}
-            // error={Boolean(touched.password && errors.password)}
-            // helperText={touched.password && errors.password}
           />
         </Stack>
 

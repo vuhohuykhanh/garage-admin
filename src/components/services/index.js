@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {
+	SIGN_IN_ADMIN,
   API_GET_ALL_USER_MAIN,
   API_GET_ALL_USER,
   API_ADD_NEW_USER,
@@ -14,7 +15,7 @@ import {
   API_ADD_NEW_SERVICE,
   API_UPDATE_SERVICE,
   API_DELETE_SERVICE,
-  API_GET_ALL_PRODUCT,
+  API_GET_ALL_PRODUCT_BY_PRODUCT_TYPE,
   API_ADD_NEW_PRODUCT,
   API_UPDATE_PRODUCT,
   API_DELETE_PRODUCT,
@@ -26,6 +27,15 @@ import {
   API_GET_ALL_BILL,
   API_CREATE_BILL,
 } from './configs';
+
+export const loginAPI = async (body) => {
+  try {
+    const response = await axios.post(SIGN_IN_ADMIN, body);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};
 
 export const getAllUserMainAPI = async () => {
   try {
@@ -164,7 +174,7 @@ export const deleteServiceAPI = async (id) => {
 
 export const getAllProductAPI = async () => {
   try {
-    const response = await axios.get(API_GET_ALL_PRODUCT);
+    const response = await axios.get(`${API_GET_ALL_PRODUCT_BY_PRODUCT_TYPE}?productTypeId=2`);
     return response;
   } catch (error) {
     return error?.response?.data || error;

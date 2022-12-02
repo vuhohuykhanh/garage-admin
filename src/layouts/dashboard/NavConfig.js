@@ -12,13 +12,13 @@ const navConfig = [
   //    icon: getIcon('eva:pie-chart-2-fill'),
   //  },
   {
-    title: 'user',
+    title: 'User',
     path: '/dashboard/user',
     icon: getIcon('eva:people-fill'),
   },
   {
-    title: 'product',
-    path: '/dashboard/products',
+    title: 'Accessory',
+    path: '/dashboard/accessory',
     icon: getIcon('eva:shopping-bag-fill'),
   },
   {
