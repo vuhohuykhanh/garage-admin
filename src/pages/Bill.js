@@ -42,11 +42,11 @@ import { getAllBillAPI, getCartDescriptionAPI } from '../components/services/ind
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'cartId', label: 'Cart ID', alignRight: false },
+  { id: 'id', label: 'Cart ID', alignRight: false },
   { id: 'owner', label: 'Owner', alignRight: false },
-  { id: 'price', label: 'Price', alignRight: false },
   { id: 'createAt', label: 'Create At', alignRight: false },
   { id: 'completeAt', label: 'Complete At', alignRight: false },
+  { id: 'price', label: 'Price', alignRight: false },
   { id: 'confirmBy', label: 'Confirm By', alignRight: false },
 ];
 
@@ -87,7 +87,7 @@ export default function Bill() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState('asc');
   const [selected, setSelected] = useState([]);
-  const [orderBy, setOrderBy] = useState('cartId');
+  const [orderBy, setOrderBy] = useState('id');
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [listBill, setListBill] = useState([]);
@@ -115,7 +115,7 @@ export default function Bill() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = listBill?.map((n) => n.name);
+      const newSelecteds = listBill?.map((n) => n?.name);
       setSelected(newSelecteds);
       return;
     }
@@ -143,19 +143,11 @@ export default function Bill() {
 
   return (
     <Page title="Product">
-      <Container>
+      <Container maxWidth="xl">
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
-            Product
+            Bill
           </Typography>
-          {/* <Button
-            variant="contained"
-            component={RouterLink}
-            to="/dashboard/addProduct"
-            startIcon={<Iconify icon="eva:plus-fill" />}
-          >
-            New product
-          </Button> */}
         </Stack>
 
         <Card>
@@ -176,8 +168,6 @@ export default function Bill() {
 
                 <TableBody>
                   {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    const something = '';
-
                     return <Row row={row} />;
                   })}
                   {emptyRows > 0 && (
@@ -190,7 +180,7 @@ export default function Bill() {
                 {isUserNotFound && (
                   <TableBody>
                     <TableRow>
-                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                      <TableCell align="center" colSpan={7} sx={{ py: 3}}>
                         <SearchNotFound searchQuery={filterName} />
                       </TableCell>
                     </TableRow>
@@ -231,7 +221,7 @@ export default function Bill() {
               value={endDate}
             />
           </span>
-          <BarChart data={filteredUsers} startDate={startDate} endDate={endDate} />
+          {/*<BarChart data={filteredUsers} startDate={startDate} endDate={endDate} />*/}
         </div>
       </Container>
     </Page>
@@ -239,14 +229,15 @@ export default function Bill() {
 }
 
 function Row(props) {
-  const { row, getCartById } = props;
+  const { row } = props;
   const {
-    cartId,
-    createAt,
+    id,
+    createTime,
     cart,
-    createEmployeeId: { name },
-  } = row;
-  const { totalPrice, idUser, createAt: completeAt } = cart[0] || {};
+		totalPrice,
+		customer: {name: userName},
+		deleteAt: completeAt,
+  } = row || {};
   const [open, setOpen] = React.useState(false);
   const [item, setItem] = useState([]);
 
@@ -267,7 +258,7 @@ function Row(props) {
 
   const handleClick = () => {
     setOpen(!open);
-    getCartDescription(cartId);
+    getCartDescription(id);
   };
 
   return (
@@ -279,18 +270,18 @@ function Row(props) {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {cartId}
+          {id}
         </TableCell>
-        <TableCell align="center">{idUser}</TableCell>
-        <TableCell align="center">{formatMoneyWithDot(totalPrice)}</TableCell>
-        <TableCell align="center">{formatDate(createAt)}</TableCell>
+        <TableCell align="center">{userName}</TableCell>
+        <TableCell align="center">{formatDate(createTime)}</TableCell>
         <TableCell align="center">{formatDate(completeAt)}</TableCell>
-        <TableCell align="center">{name}</TableCell>
+        <TableCell align="center">{formatMoneyWithDot(totalPrice)}</TableCell>
+        <TableCell align="center">{"Chưa lấy được name"}</TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            {item?.products?.length > 0 ? (
+            {item?.length > 0 ? (
               <Box sx={{ margin: 4 }}>
                 <Typography variant="h6" gutterBottom component="div">
                   Sản phẩm
@@ -304,40 +295,13 @@ function Row(props) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {item?.products?.map((value) => (
-                      <TableRow key={value?.id}>
+                    {item?.map((value) => (
+                      <TableRow key={value?.cartDesId}>
                         <TableCell component="th" scope="row" sx={{ width: '400px' }}>
-                          {value?.productId?.name}
+                          {value?.product?.name}
                         </TableCell>
                         <TableCell align="center">{value?.quantity}</TableCell>
-                        <TableCell align="right">{formatMoneyWithDot(value?.productPrice * value?.quantity)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Box>
-            ) : null}
-            {item?.services?.length > 0 ? (
-              <Box sx={{ margin: 4 }}>
-                <Typography variant="h6" gutterBottom component="div">
-                  Dịch vụ
-                </Typography>
-                <Table size="small" aria-label="purchases">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Tên sản phẩm</TableCell>
-                      <TableCell align="center">Số lượng</TableCell>
-                      <TableCell align="right">Giá tiền</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {item?.services?.map((value) => (
-                      <TableRow key={value?.id}>
-                        <TableCell component="th" scope="row" sx={{ width: '400px' }}>
-                          {value?.serviceId?.name}
-                        </TableCell>
-                        <TableCell align="center">{value?.quantity}</TableCell>
-                        <TableCell align="right">{formatMoneyWithDot(value?.servicePrice * value?.quantity)}</TableCell>
+                        <TableCell align="right">{formatMoneyWithDot(value?.price * value?.quantity)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

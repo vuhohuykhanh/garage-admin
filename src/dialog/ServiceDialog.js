@@ -6,7 +6,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import { addNewServiceAPI, getAllServiceTypeAPI } from '../components/services/index';
+import { getAllServiceTypeAPI } from '../components/services/index';
 
 export default function ServiceDialog(props) {
   const { openDialog, setOpenDialog, getAllService, setContentToast, setSeverity, setOpenToast } = props;
@@ -18,37 +18,36 @@ export default function ServiceDialog(props) {
   const [isError, setIsError] = React.useState(false);
   const [listServiceType, setListServiceType] = React.useState();
 
-  const addNewService = async (data) => {
-    try {
-      const res = await addNewServiceAPI(data);
-      if (res.status === 200) {
-        setName(null);
-        setImage(null);
-        setPrice(null);
-        setServiceType(null);
-        setDescription(null);
-        setContentToast(res?.data);
-        setSeverity('success');
-        setOpenToast(true);
-        setOpenDialog(false);
-        getAllService();
-      } else {
-        setContentToast('Thêm dịch vụ thất bại');
-        setOpenToast(true);
-        setSeverity('error');
-      }
-    } catch (error) {
-      setContentToast('Thêm dịch vụ thất bại');
-      setOpenToast(true);
-      setSeverity('error');
-    }
-  };
+  //const addNewService = async (data) => {
+  //  try {
+  //    const res = await addNewServiceAPI(data);
+  //    if (res.status === 200) {
+  //      setName(null);
+  //      setImage(null);
+  //      setPrice(null);
+  //      setServiceType(null);
+  //      setDescription(null);
+  //      setContentToast(res?.data);
+  //      setSeverity('success');
+  //      setOpenToast(true);
+  //      setOpenDialog(false);
+  //      getAllService();
+  //    } else {
+  //      setContentToast('Thêm dịch vụ thất bại');
+  //      setOpenToast(true);
+  //      setSeverity('error');
+  //    }
+  //  } catch (error) {
+  //    setContentToast('Thêm dịch vụ thất bại');
+  //    setOpenToast(true);
+  //    setSeverity('error');
+  //  }
+  //};
 
   const getAllServiceType = async () => {
     try {
       const res = await getAllServiceTypeAPI();
       setListServiceType(res?.data);
-      console.log(res?.data);
     } catch (error) {
       console.log(error);
     }
@@ -83,7 +82,6 @@ export default function ServiceDialog(props) {
         ],
       };
 
-      console.log(data);
     } else {
       setIsError(false);
       const data = {
@@ -98,10 +96,7 @@ export default function ServiceDialog(props) {
           },
         ],
       };
-
-      console.log(data);
-
-      addNewService(data);
+      //addNewService(data);
     }
   };
 

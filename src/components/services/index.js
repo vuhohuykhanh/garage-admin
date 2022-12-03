@@ -8,10 +8,9 @@ import {
   API_DELETE_USER,
   API_GET_ALL_CART,
   API_GET_ALL_CART_DES,
-  API_GET_BY_ID_CART_DES,
+  API_GET_CART_DESCRIPTION_BY_ID,
   API_ADD_CART_DES,
   API_DELETE_CART_DES,
-  API_GET_ALL_SERVICE,
   API_ADD_NEW_SERVICE,
   API_UPDATE_SERVICE,
   API_DELETE_SERVICE,
@@ -26,6 +25,7 @@ import {
   API_UPDATE_STATUS,
   API_GET_ALL_BILL,
   API_CREATE_BILL,
+	API_GET_ALL_ACCESSORY_TYPE,
 } from './configs';
 
 export const loginAPI = async (body) => {
@@ -102,7 +102,7 @@ export const getAllCartDesAPI = async () => {
 
 export const getCartDescriptionAPI = async (id) => {
   try {
-    const response = await axios.get(`${API_GET_BY_ID_CART_DES}?id=${id}`);
+    const response = await axios.get(`${API_GET_CART_DESCRIPTION_BY_ID}?cartId=${id}`);
     return response;
   } catch (error) {
     return error?.response?.data || error;
@@ -129,48 +129,48 @@ export const getDeleteCartAPI = async (id) => {
 
 export const getAllServicesAPI = async () => {
   try {
-    const response = await axios.get(API_GET_ALL_SERVICE);
+    const response = await axios.get(`${API_GET_ALL_PRODUCT_BY_PRODUCT_TYPE}?productTypeId=1`);
     return response;
   } catch (error) {
     return error?.response?.data || error;
   }
 };
 
-export const addNewServiceAPI = async (body) => {
-  try {
-    const response = await axios.post(API_ADD_NEW_SERVICE, body);
-    return response;
-  } catch (error) {
-    return error?.response?.data || error;
-  }
-};
+//export const addNewServiceAPI = async (body) => {
+//  try {
+//    const response = await axios.post(API_ADD_NEW_SERVICE, body);
+//    return response;
+//  } catch (error) {
+//    return error?.response?.data || error;
+//  }
+//};
 
-export const getUpdateService = async (id, body) => {
-  try {
-    const response = await axios.patch(`${API_UPDATE_SERVICE}/${id}`, body);
-    return response;
-  } catch (error) {
-    return error?.response?.data || error;
-  }
-};
+//export const getUpdateService = async (id, body) => {
+//  try {
+//    const response = await axios.patch(`${API_UPDATE_SERVICE}/${id}`, body);
+//    return response;
+//  } catch (error) {
+//    return error?.response?.data || error;
+//  }
+//};
 
-export const editServiceAPI = async (body) => {
-  try {
-    const response = await axios.patch(API_UPDATE_SERVICE, body);
-    return response;
-  } catch (error) {
-    return error?.response?.data || error;
-  }
-};
+//export const editServiceAPI = async (body) => {
+//  try {
+//    const response = await axios.patch(API_UPDATE_SERVICE, body);
+//    return response;
+//  } catch (error) {
+//    return error?.response?.data || error;
+//  }
+//};
 
-export const deleteServiceAPI = async (id) => {
-  try {
-    const response = await axios.delete(`${API_DELETE_SERVICE}/${id}`);
-    return response;
-  } catch (error) {
-    return error?.response?.data || error;
-  }
-};
+//export const deleteServiceAPI = async (id) => {
+//  try {
+//    const response = await axios.delete(`${API_DELETE_SERVICE}/${id}`);
+//    return response;
+//  } catch (error) {
+//    return error?.response?.data || error;
+//  }
+//};
 
 export const getAllProductAPI = async () => {
   try {
@@ -190,9 +190,9 @@ export const addNewProductAPI = async (body) => {
   }
 };
 
-export const editProductAPI = async (body) => {
+export const editProductAPI = async (body, productId) => {
   try {
-    const response = await axios.patch(API_UPDATE_PRODUCT, body);
+    const response = await axios.patch(`${API_UPDATE_PRODUCT}/${productId}`, body);
     return response;
   } catch (error) {
     return error?.response?.data || error;
@@ -262,9 +262,18 @@ export const getAllBillAPI = async () => {
   }
 };
 
-export const createBillAPI = async (body) => {
+export const createBillAPI = async (id) => {
   try {
-    const response = await axios.post(API_CREATE_BILL, body);
+    const response = await axios.delete(`${API_CREATE_BILL}/${id}`);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};
+
+export const getAllAccessoryTypeAPI = async () => {
+  try {
+    const response = await axios.get(API_GET_ALL_ACCESSORY_TYPE);
     return response;
   } catch (error) {
     return error?.response?.data || error;

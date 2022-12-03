@@ -13,11 +13,10 @@ import {
   Card,
   Table,
   Stack,
-  Avatar,
   Button,
-  Checkbox,
   TableRow,
   TableBody,
+  Collapse,
   TableCell,
   Container,
   Typography,
@@ -26,9 +25,8 @@ import {
   Select,
   FormControl,
   MenuItem,
-  InputLabel,
+  IconButton,
   Box,
-  Paper,
   TableHead,
 } from '@mui/material';
 // components
@@ -40,7 +38,16 @@ import Scrollbar from '../components/Scrollbar';
 import Iconify from '../components/Iconify';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../sections/@dashboard/user';
 
-import { getAllCartAPI, getAllStatusAPI, updateStatusAPI, createBillAPI } from '../components/services/index';
+import KeyboardArrowUpIcon from '@mui/icons-material/ArrowDownward';
+import KeyboardArrowDownIcon from '@mui/icons-material/ArrowUpward';
+
+import {
+  getAllCartAPI,
+  getAllStatusAPI,
+  updateStatusAPI,
+  createBillAPI,
+  getCartDescriptionAPI,
+} from '../components/services/index';
 
 // ----------------------------------------------------------------------
 
@@ -48,7 +55,7 @@ const TABLE_HEAD = [
   { id: 'cardId', label: 'Cart ID', alignRight: false },
   { id: 'owner', label: 'Owner', alignRight: false },
   { id: 'price', label: 'Price', alignRight: false },
-  { id: 'createAt', label: 'Create At', alignRight: false },
+  { id: 'createTime', label: 'Create At', alignRight: false },
   { id: 'status', label: 'Status', alignRight: false },
 ];
 
@@ -154,7 +161,7 @@ export default function User() {
 
   return (
     <Page title="User">
-      <Container>
+      <Container maxWidth="xl">
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
             Orders
@@ -202,6 +209,7 @@ export default function User() {
           <TablePagination
             rowsPerPageOptions={[1, 5, 10]}
             component="div"
+            createTime
             count={listCart.length}
             rowsPerPage={rowsPerPage}
             page={page}
@@ -217,44 +225,59 @@ export default function User() {
 
 const Row = ({ row, listStatus, getAllCart }) => {
   const {
-    _id,
-    cartId,
-    createAt,
-    idUser,
-    statusId: { statusId },
+    id: cartId,
+    createTime,
+    customer: { id: idUser, name: userName },
+    status: { id },
     totalPrice,
   } = row;
 
-  const [status, setStatus] = useState(statusId);
-  const [afterStatus, setAfterStatus] = useState(statusId);
+  const [status, setStatus] = useState(id);
+  const [afterStatus, setAfterStatus] = useState(id);
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
   const [openToast, setOpenToast] = useState(false);
   const [severity, setSeverity] = useState(false);
   const [contentToast, setContentToast] = useState('');
 
+  const [openDetailCart, setOpenDetailCart] = useState(false);
+  const [cartDetail, setCartDetail] = useState([]);
+
   const updateStatus = async (body) => {
     try {
       const res = await updateStatusAPI(body);
-      getAllCart();
-      setContentToast(res?.data);
-      setSeverity('success');
-      setOpenToast(true);
+      if (res?.status === 200) {
+        getAllCart();
+        setContentToast(res?.data);
+        setSeverity('success');
+        setOpenToast(true);
+      } else {
+        setContentToast(error);
+        setSeverity('error');
+        setOpenToast(true);
+      }
     } catch (error) {
       setContentToast(error);
       setSeverity('error');
       setOpenToast(true);
-      console.log(error);
     }
   };
 
-  const createBill = async (body) => {
+  const createBill = async (cartId) => {
     try {
-      const res = await createBillAPI(body);
-      getAllCart();
-      setContentToast(res?.data);
-      setSeverity('success');
-      setOpenToast(true);
+      const res = await createBillAPI(cartId);
+      if (res?.status === 200) {
+        setContentToast(res?.data);
+        setSeverity('success');
+        setOpenToast(true);
+        setOpen2(false);
+        setTimeout(() => getAllCart(), 1000);
+      } else {
+        setContentToast(error);
+        setSeverity('error');
+        setOpenToast(true);
+        console.log(error);
+      }
     } catch (error) {
       setContentToast(error);
       setSeverity('error');
@@ -297,49 +320,90 @@ const Row = ({ row, listStatus, getAllCart }) => {
     setOpen(false);
   };
 
-  const handleOk2 = () => {
-    const body = {
-      cart: _id,
-      cartId,
-      createEmployeeId: '6303d203bc750297bcb5723f',
-    };
+  const getCartDescription = async (cartId) => {
+    try {
+      const res = await getCartDescriptionAPI(cartId);
+      setCartDetail(res?.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-    setOpen2(false);
-    createBill(body);
+  const handleClick = () => {
+    if (!openDetailCart) getCartDescription(cartId);
+    setOpenDetailCart(!openDetailCart);
   };
 
   return (
-    <TableRow hover key={cartId} tabIndex={-1} role="checkbox">
-      <TableCell align="center" />
-      <TableCell align="center">{cartId}</TableCell>
-      <TableCell align="center">{idUser?.name}</TableCell>
-      <TableCell align="center">{formatMoneyWithDot(totalPrice)}</TableCell>
-      <TableCell align="center">{formatDate(createAt)}</TableCell>
-
-      <TableCell align="center">
-        <FormControl style={{ marginTop: '10px' }}>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={status}
-            onChange={handleChangeStatus}
-          >
-            {listStatus?.map((value) => (
-              <MenuItem value={value?.statusId} key={value?.statusId}>
-                {value?.statusName}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </TableCell>
-      {status === 4 && (
+    <>
+      <TableRow hover key={cartId} tabIndex={-1} role="checkbox">
         <TableCell>
-          <Button variant="text" onClick={handleCreateBill}>
-            Xác nhận
-          </Button>
+          <IconButton aria-label="expand row" size="small" onClick={handleClick}>
+            {openDetailCart ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
         </TableCell>
-      )}
+        <TableCell align="center">{cartId}</TableCell>
+        <TableCell align="center">{userName}</TableCell>
+        <TableCell align="center">{formatMoneyWithDot(totalPrice)}</TableCell>
+        <TableCell align="center">{formatDate(createTime)}</TableCell>
 
+        <TableCell align="center">
+          <FormControl style={{ marginTop: '10px' }}>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={status}
+              onChange={handleChangeStatus}
+            >
+              {listStatus?.map((value) => (
+                <MenuItem value={value?.id} key={value?.id}>
+                  {value?.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </TableCell>
+        {status === 5 && (
+          <TableCell>
+            <Button variant="text" onClick={handleCreateBill}>
+              Xác nhận
+            </Button>
+          </TableCell>
+        )}
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+          <Collapse in={openDetailCart} timeout="auto" unmountOnExit>
+            {cartDetail?.length > 0 ? (
+              <Box sx={{ margin: 4 }}>
+                <Typography variant="h6" gutterBottom component="div">
+                  Sản phẩm
+                </Typography>
+                <Table size="small" aria-label="purchases">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Tên sản phẩm</TableCell>
+                      <TableCell align="center">Số lượng</TableCell>
+                      <TableCell align="right">Giá tiền</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {cartDetail?.map((value) => (
+                      <TableRow key={value?.cartDesId}>
+                        <TableCell component="th" scope="row" sx={{ width: '400px' }}>
+                          {value?.product?.name}
+                        </TableCell>
+                        <TableCell align="center">{value?.quantity}</TableCell>
+                        <TableCell align="right">{formatMoneyWithDot(value?.price * value?.quantity)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            ) : null}
+          </Collapse>
+        </TableCell>
+      </TableRow>
       <Dialog
         open={open}
         onClose={handleClose}
@@ -373,7 +437,7 @@ const Row = ({ row, listStatus, getAllCart }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose2}>Hủy</Button>
-          <Button onClick={handleOk2} autoFocus>
+          <Button onClick={() => createBill(cartId)} autoFocus>
             Xác nhận
           </Button>
         </DialogActions>
@@ -387,6 +451,6 @@ const Row = ({ row, listStatus, getAllCart }) => {
           setOpenToast(false);
         }}
       />
-    </TableRow>
+    </>
   );
 };

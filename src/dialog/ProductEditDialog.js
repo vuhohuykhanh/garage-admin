@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import { Button, Box } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -6,31 +6,31 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import { editProductAPI, getAllManufacturerAPI, getAllProductTypeAPI } from '../components/services/index';
+import { editProductAPI, getAllManufacturerAPI, getAllAccessoryTypeAPI } from '../components/services/index';
 
 export default function ProductEditDialog(props) {
   const { openDialog, setOpenDialog, getAllProduct, setContentToast, setSeverity, setOpenToast, product } = props;
-  const [name, setName] = React.useState();
-  const [quantity, setQuantity] = React.useState();
-  const [image, setImage] = React.useState();
-  const [manufacturer, setManufacturer] = React.useState();
-  const [productType, setProductType] = React.useState();
-  const [isError, setIsError] = React.useState(false);
-  //  const [listManufacturer, setListManufacturer] = React.useState();
-  //  const [listProductType, setListProductType] = React.useState();
+  const [name, setName] = useState();
+  const [quantity, setQuantity] = useState();
+  const [price, setPrice] = useState();
+  const [manufacturer, setManufacturer] = useState();
+  const [accessoryType, setAccessoryType] = useState();
+  const [isError, setIsError] = useState(false);
+  const [listManufacturer, setListManufacturer] = useState();
+  const [listAccessoryType, setListAccessoryType] = useState();
 
   React.useEffect(() => {
     setName(product?.name);
-    setImage(product?.image);
+    setPrice(product?.price);
     setQuantity(product?.quantity);
-    // setManufacturer(product?.manufacturerId);
-    // setProductType(product?.productTypeId);
+    setManufacturer(product?.manufacturer);
+    console.log('product?.accessoryType', product?.accessoryType);
+    setAccessoryType(product?.accessoryType);
   }, [product]);
 
-  const editProduct = async (data) => {
+  const editProduct = async (data, productId) => {
     try {
-      const res = await editProductAPI(data);
-      console.log(res);
+      const res = await editProductAPI(data, productId);
       if (res.status === 200) {
         setContentToast(res?.data);
         setSeverity('success');
@@ -49,54 +49,47 @@ export default function ProductEditDialog(props) {
     }
   };
 
-  //  const getAllManufacturer = async () => {
-  //    try {
-  //      const res = await getAllManufacturerAPI();
-  //      setListManufacturer(res?.data);
-  //      console.log(res?.data);
-  //    } catch (error) {
-  //      console.log(error);
-  //    }
-  //  };
+  const getAllManufacturer = async () => {
+    try {
+      const res = await getAllManufacturerAPI();
+      setListManufacturer(res?.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  //  const getAllProductType = async () => {
-  //    try {
-  //      const res = await getAllProductTypeAPI();
-  //      setListProductType(res?.data);
-  //      console.log(res?.data);
-  //    } catch (error) {
-  //      console.log(error);
-  //    }
-  //  };
+  const getAllProductType = async () => {
+    try {
+      const res = await getAllAccessoryTypeAPI();
+      setListAccessoryType(res?.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  //  React.useEffect(() => {
-  //    getAllManufacturer();
-  //    getAllProductType();
-  //  }, []);
+  React.useEffect(() => {
+    getAllManufacturer();
+    getAllProductType();
+  }, []);
 
   const handleClose = () => {
     setOpenDialog(false);
   };
 
   const handleEditUser = () => {
-    // if (!name || !image || !quantity || !manufacturer || !productType) {
-    if (!name || !image || !quantity) {
+    if (!name || !quantity || !manufacturer || !accessoryType) {
       setIsError(true);
     } else {
       setIsError(false);
-      console.log(product?.productId);
       const data = {
-        productId: product?.productId,
-        image,
         name,
         quantity,
-        // manufacturerId: manufacturer?._id,
-        // productTypeId: productType?._id,
+        manufacturer: manufacturer?.id,
+        accessoryType: accessoryType?.id,
+				price,
       };
 
-      console.log(data);
-
-      editProduct(data);
+      editProduct(data, product?.id);
     }
   };
 
@@ -104,7 +97,33 @@ export default function ProductEditDialog(props) {
     <div>
       <Dialog open={openDialog} onClose={handleClose}>
         <DialogTitle>Edit Product</DialogTitle>
-        <DialogContent sx={{ height: 300 }}>
+        <DialogContent sx={{ height: 650 }}>
+          <Autocomplete
+            disablePortal
+            id="accessoryType"
+            value={accessoryType}
+            options={listAccessoryType}
+            getOptionLabel={(option) => option?.name}
+            fullWidth
+            sx={{ mt: 4 }}
+            onChange={(_, newValue) => {
+              setAccessoryType(newValue);
+            }}
+            renderInput={(params) => <TextField {...params} label="Accessory Type" />}
+          />
+          <Autocomplete
+            disablePortal
+            id="manufacturer"
+            value={manufacturer}
+            options={listManufacturer}
+            getOptionLabel={(option) => option?.name}
+            sx={{ mt: 4 }}
+            onChange={(_, newValue) => {
+              setManufacturer(newValue);
+            }}
+            renderInput={(params) => <TextField {...params} label="Manufacturer" />}
+          />
+
           <TextField
             margin="dense"
             id="name"
@@ -113,68 +132,38 @@ export default function ProductEditDialog(props) {
             fullWidth
             variant="outlined"
             value={name}
-            sx={{ mt: 3 }}
+            sx={{ mt: 4 }}
             onChange={(e) => setName(e.target.value)}
             required
           />
-          {/* <Box
+          <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
               mt: 3,
             }}
           >
-            <Autocomplete
-              disablePortal
-              id="manufacturer"
-              options={listManufacturer}
-              getOptionLabel={(option) => option?.manufacturerName}
+            <TextField
+              autoFocus
+              id="quantity"
+              label="Quantity"
+              type="number"
+              size="medium"
+              value={quantity}
               sx={{ width: 500, mr: 2 }}
-              //  value={manufacturer}
-              onChange={(e, newValue) => {
-                console.log(newValue);
-                setManufacturer(newValue?._id);
-              }}
-              renderInput={(params) => <TextField {...params} label="Manufacturer" />}
+              onChange={(e) => setQuantity(e.target.value)}
+              required
             />
-            <Autocomplete
-              disablePortal
-              id="productType"
-              options={listProductType}
-              getOptionLabel={(option) => option?.productTypeName}
+            <TextField
+              id="price"
+              label="Price"
+              type="Number"
               fullWidth
-              value={listProductType?.find((value) => value?._id === productType?._id)}
-              onChange={(e, newValue) => {
-                console.log(newValue);
-                setProductType(newValue?._id);
-              }}
-              renderInput={(params) => <TextField {...params} label="Product Type" />}
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              required
             />
-          </Box> */}
-          <TextField
-            margin="dense"
-            id="image"
-            label="Image URL"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={image}
-            sx={{ mt: 3 }}
-            onChange={(e) => setImage(e.target.value)}
-            required
-          />
-          <TextField
-            autoFocus
-            id="quantity"
-            label="Quantity"
-            type="number"
-            fullWidth
-            size="medium"
-            value={quantity}
-            sx={{ mt: 3 }}
-            onChange={(e) => setQuantity(e.target.value)}
-            required
-          />
+          </Box>
           <p
             style={{
               margin: '10px',

@@ -6,31 +6,29 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import { addNewProductAPI, getAllManufacturerAPI, getAllProductTypeAPI } from '../components/services/index';
+import { addNewProductAPI, getAllManufacturerAPI, getAllAccessoryTypeAPI } from '../components/services/index';
 
 export default function ProductDialog(props) {
   const { openDialog, setOpenDialog, getAllProduct, setContentToast, setSeverity, setOpenToast } = props;
   const [name, setName] = React.useState();
-  const [image, setImage] = React.useState();
   const [quantity, setQuantity] = React.useState();
   const [price, setPrice] = React.useState();
   const [manufacturer, setManufacturer] = React.useState();
-  const [productType, setProductType] = React.useState();
+  const [accessoryType, setAccessoryType] = React.useState();
   const [description, setDescription] = React.useState();
   const [isError, setIsError] = React.useState(false);
   const [listManufacturer, setListManufacturer] = React.useState();
-  const [listProductType, setListProductType] = React.useState();
+  const [listAccessoryType, setListAccessoryType] = React.useState();
 
   const addNewProduct = async (data) => {
     try {
       const res = await addNewProductAPI(data);
       if (res.status === 200) {
         setName(null);
-        setImage(null);
         setQuantity(null);
         setPrice(null);
         setManufacturer(null);
-        setProductType(null);
+        setAccessoryType(null);
         setDescription(null);
         setContentToast(res?.data);
         setSeverity('success');
@@ -55,17 +53,15 @@ export default function ProductDialog(props) {
     try {
       const res = await getAllManufacturerAPI();
       setListManufacturer(res?.data);
-      console.log(res?.data);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const getAllProductType = async () => {
+  const getAllAccessoryType = async () => {
     try {
-      const res = await getAllProductTypeAPI();
-      setListProductType(res?.data);
-      console.log(res?.data);
+      const res = await getAllAccessoryTypeAPI();
+      setListAccessoryType(res?.data);
     } catch (error) {
       console.log(error);
     }
@@ -73,41 +69,38 @@ export default function ProductDialog(props) {
 
   React.useEffect(() => {
     getAllManufacturer();
-    getAllProductType();
+    getAllAccessoryType();
   }, []);
 
   const handleClose = () => {
     setOpenDialog(false);
     setName(null);
-    setImage(null);
     setQuantity(null);
     setPrice(null);
     setManufacturer(null);
-    setProductType(null);
+    setAccessoryType(null);
     setDescription(null);
   };
 
   const handleAddProduct = () => {
-    if (!quantity || !image || !name || !price || !manufacturer || !productType) {
+    if (!quantity || !name || !price || !manufacturer || !accessoryType) {
       setIsError(true);
     } else {
       setIsError(false);
       const data = {
         name,
-        image,
         quantity,
         price,
-        manufacturerId: manufacturer,
-        productTypeId: productType,
-        description: [
-          {
-            type: 'Content',
-            description: description || '',
-          },
-        ],
+        manufacturer,
+        accessoryType,
+				productType: 2,
+        //description: [
+        //  {
+        //    type: 'Content',
+        //    description: description || '',
+        //  },
+        //],
       };
-
-      console.log(data);
 
       // CALL API add new product
       addNewProduct(data);
@@ -128,17 +121,6 @@ export default function ProductDialog(props) {
             variant="outlined"
             sx={{ mt: 2 }}
             onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <TextField
-            margin="dense"
-            id="image"
-            label="Image URL"
-            type="text"
-            fullWidth
-            variant="outlined"
-            sx={{ mt: 2 }}
-            onChange={(e) => setImage(e.target.value)}
             required
           />
           <Box
@@ -178,25 +160,23 @@ export default function ProductDialog(props) {
               disablePortal
               id="manufacturer"
               options={listManufacturer}
-              getOptionLabel={(option) => option?.manufacturerName}
+              getOptionLabel={(option) => option?.name}
               sx={{ width: 500, mr: 2 }}
               onChange={(e, newValue) => {
-                console.log(newValue);
-                setManufacturer(newValue?._id);
+                setManufacturer(newValue?.id);
               }}
               renderInput={(params) => <TextField {...params} label="Manufacturer" />}
             />
             <Autocomplete
               disablePortal
-              id="productType"
-              options={listProductType}
-              getOptionLabel={(option) => option?.productTypeName}
+              id="accessoryType"
+              options={listAccessoryType}
+              getOptionLabel={(option) => option?.name}
               fullWidth
               onChange={(e, newValue) => {
-                console.log(newValue);
-                setProductType(newValue?._id);
+                setAccessoryType(newValue?.id);
               }}
-              renderInput={(params) => <TextField {...params} label="Product Type" />}
+              renderInput={(params) => <TextField {...params} label="Accessory Type" />}
             />
           </Box>
           <TextField

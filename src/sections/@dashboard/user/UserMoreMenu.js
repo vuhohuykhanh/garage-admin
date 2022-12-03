@@ -63,13 +63,6 @@ export default function UserMoreMenu(props) {
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MenuItem sx={{ color: 'text.secondary' }}>
-          <ListItemIcon>
-            <Iconify icon="eva:trash-2-outline" width={24} height={24} />
-          </ListItemIcon>
-          <ListItemText primary="Delete" onClick={handleOpenToast} primaryTypographyProps={{ variant: 'body2' }} />
-        </MenuItem>
-
         {type !== 'người dùng' && (
           <MenuItem component={RouterLink} to="#" sx={{ color: 'text.secondary' }}>
             <ListItemIcon>
@@ -78,6 +71,13 @@ export default function UserMoreMenu(props) {
             <ListItemText primary="Edit" onClick={handleEdit} primaryTypographyProps={{ variant: 'body2' }} />
           </MenuItem>
         )}
+
+        <MenuItem sx={{ color: 'text.secondary' }}>
+          <ListItemIcon>
+            <Iconify icon="eva:trash-2-outline" width={24} height={24} />
+          </ListItemIcon>
+          <ListItemText primary="Delete" onClick={handleOpenToast} primaryTypographyProps={{ variant: 'body2' }} />
+        </MenuItem>
       </Menu>
       <Dialog
         open={open}

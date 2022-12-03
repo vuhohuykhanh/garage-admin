@@ -28,12 +28,12 @@ import Iconify from '../components/Iconify';
 import SearchNotFound from '../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../sections/@dashboard/user';
 // mock
-import { deleteServiceAPI, getAllServicesAPI } from '../components/services/index';
+import { deleteProductAPI, getAllServicesAPI } from '../components/services/index';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'serviceId', label: 'Service ID', alignRight: false },
+  { id: 'id', label: 'Service ID', alignRight: false },
   { id: 'serviceName', label: 'Service Name', alignRight: false },
   { id: 'email', label: 'Price', alignRight: false },
   { id: 'address', label: 'Service Type', alignRight: false },
@@ -97,8 +97,9 @@ export default function Service() {
 
   const deleteAPI = async (id) => {
     try {
-      const res = await deleteServiceAPI(id);
+      const res = await deleteProductAPI(id);
       if (res.status === 200) {
+				console.log('res', res)
         setContentToast(res?.data);
         setSeverity('success');
         setOpenToast(true);
@@ -149,22 +150,6 @@ export default function Service() {
     setFilterName(event.target.value);
   };
 
-  const handleChangeStatus = (id) => {
-    const temp = listService.filter((e) => e.id === id);
-    const tempArr = listService.filter((e) => e.id !== id);
-    let temp1 = [];
-    if (temp[0].status === true) {
-      temp[0].status = false;
-      temp1 = temp;
-    } else {
-      temp[0].status = true;
-      temp1 = temp;
-    }
-    const temp2 = [...temp1, ...tempArr];
-    temp2.sort((a, b) => a.id - b.id);
-    setListService(temp2);
-  };
-
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - listService.length) : 0;
   const filteredUsers = applySortFilter(listService, getComparator(order, orderBy), filterName);
   const isUserNotFound = filteredUsers?.length === 0;
@@ -205,24 +190,17 @@ export default function Service() {
                 <TableBody>
                   {filteredUsers?.map((row) => {
                     const {
-                      serviceId,
+                      id,
                       name,
                       price,
-                      serviceTypeId: { serviceTypeName },
+                      serviceType: { name: serviceName },
                     } = row || {};
-                    // {listService?.map((row) => {
-                    //	const {
-                    //	  serviceId,
-                    //	  name,
-                    //	  price,
-                    //	  serviceTypeId: { serviceTypeName },
-                    //	} = row || {};
-                    const isItemSelected = selected.indexOf(serviceId) !== -1;
+                    const isItemSelected = selected.indexOf(id) !== -1;
 
                     return (
                       <TableRow
                         hover
-                        key={serviceId}
+                        key={id}
                         tabIndex={-1}
                         role="checkbox"
                         selected={isItemSelected}
@@ -231,16 +209,16 @@ export default function Service() {
                         <TableCell padding="checkbox">
                           {/* <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, name)} /> */}
                         </TableCell>
-                        <TableCell align="center">{serviceId}</TableCell>
+                        <TableCell align="center">{id}</TableCell>
                         <TableCell align="center">{name}</TableCell>
                         <TableCell align="center">{formatMoneyWithDot(price)}</TableCell>
-                        <TableCell align="center">{serviceTypeName}</TableCell>
+                        <TableCell align="center">{serviceName}</TableCell>
                         <TableCell align="right">
                           <UserMoreMenu
-                            id={serviceId}
+                            id={id}
                             name={name}
                             entity={row}
-                            type={'dịch vụ'}
+                            type={'Dịch vụ'}
                             deleteAPI={deleteAPI}
                             setSeverity={setSeverity}
                             setOpenToast={setOpenToast}

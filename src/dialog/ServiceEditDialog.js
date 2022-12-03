@@ -6,7 +6,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import { editServiceAPI } from '../components/services/index';
+//import { editServiceAPI } from '../components/services/index';
 
 export default function ServiceEditDialog(props) {
   const { openDialog, setOpenDialog, getAllService, setContentToast, setSeverity, setOpenToast, service } = props;
@@ -19,27 +19,27 @@ export default function ServiceEditDialog(props) {
     setImage(service?.image);
   }, [service]);
 
-  const editService = async (data) => {
-    try {
-      const res = await editServiceAPI(data);
-      console.log(res);
-      if (res.status === 200) {
-        setContentToast(res?.data);
-        setSeverity('success');
-        setOpenToast(true);
-        setOpenDialog(false);
-        getAllService();
-      } else {
-        setContentToast('Sửa sản phẩm thất bại');
-        setOpenToast(true);
-        setSeverity('error');
-      }
-    } catch (error) {
-      setContentToast('Sửa sản phẩm thất bại');
-      setOpenToast(true);
-      setSeverity('error');
-    }
-  };
+  //const editService = async (data) => {
+  //  try {
+  //    const res = await editServiceAPI(data);
+  //    console.log(res);
+  //    if (res.status === 200) {
+  //      setContentToast(res?.data);
+  //      setSeverity('success');
+  //      setOpenToast(true);
+  //      setOpenDialog(false);
+  //      getAllService();
+  //    } else {
+  //      setContentToast('Sửa sản phẩm thất bại');
+  //      setOpenToast(true);
+  //      setSeverity('error');
+  //    }
+  //  } catch (error) {
+  //    setContentToast('Sửa sản phẩm thất bại');
+  //    setOpenToast(true);
+  //    setSeverity('error');
+  //  }
+  //};
 
   const handleClose = () => {
     setOpenDialog(false);
@@ -56,9 +56,7 @@ export default function ServiceEditDialog(props) {
         name,
       };
 
-      console.log(data);
-
-      editService(data);
+      //editService(data);
     }
   };
 
