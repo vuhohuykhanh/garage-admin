@@ -16,10 +16,10 @@ export const API_GET_ALL_CART = `${BASE_URL}/cart/get-all`;
 export const API_GET_ALL_BILL = `${BASE_URL}/cart/get-bill`;
 export const API_UPDATE_STATUS = `${BASE_URL}/cart/update-status`;
 
+export const API_ADD_CART_DES = `${BASE_URL}/cart-description/add`;
+//export const API_DELETE_CART_DES = `${BASE_URL}/cart-description/delete`;
 export const API_GET_ALL_CART_DES = `${BASE_URL}/cart-description/get-all`;
 export const API_GET_CART_DESCRIPTION_BY_ID = `${BASE_URL}/cart-description/get-cart-description-by-cart-id`;
-export const API_ADD_CART_DES = `${BASE_URL}/cartDescription/add`;
-export const API_DELETE_CART_DES = `${BASE_URL}/cartDescription/delete`;
 
 export const API_GET_ALL_PRODUCT_BY_PRODUCT_TYPE = `${BASE_URL}/product/get-products-by-product-type`;
 export const API_ADD_NEW_PRODUCT = `${BASE_URL}/product/create`;

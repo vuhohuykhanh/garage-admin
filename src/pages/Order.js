@@ -242,6 +242,7 @@ const Row = ({ row, listStatus, getAllCart }) => {
 
   const [openDetailCart, setOpenDetailCart] = useState(false);
   const [cartDetail, setCartDetail] = useState([]);
+  const [cartDetailAdd, setCartDetailAdd] = useState([]);
 
   const updateStatus = async (body) => {
     try {
@@ -252,7 +253,7 @@ const Row = ({ row, listStatus, getAllCart }) => {
         setSeverity('success');
         setOpenToast(true);
       } else {
-        setContentToast(error);
+        setContentToast('Error happen when update status');
         setSeverity('error');
         setOpenToast(true);
       }
@@ -273,10 +274,9 @@ const Row = ({ row, listStatus, getAllCart }) => {
         setOpen2(false);
         setTimeout(() => getAllCart(), 1000);
       } else {
-        setContentToast(error);
+        setContentToast('Error happen when create bill');
         setSeverity('error');
         setOpenToast(true);
-        console.log(error);
       }
     } catch (error) {
       setContentToast(error);
@@ -323,7 +323,10 @@ const Row = ({ row, listStatus, getAllCart }) => {
   const getCartDescription = async (cartId) => {
     try {
       const res = await getCartDescriptionAPI(cartId);
-      setCartDetail(res?.data);
+      if (res?.status === 200) {
+        setCartDetail(res?.data?.filter((value) => value?.type !== 'Báo giá'));
+        setCartDetailAdd(res?.data?.filter((value) => value?.type === 'Báo giá'));
+      }
     } catch (error) {
       console.log(error);
     }
@@ -389,6 +392,33 @@ const Row = ({ row, listStatus, getAllCart }) => {
                   </TableHead>
                   <TableBody>
                     {cartDetail?.map((value) => (
+                      <TableRow key={value?.cartDesId}>
+                        <TableCell component="th" scope="row" sx={{ width: '400px' }}>
+                          {value?.product?.name}
+                        </TableCell>
+                        <TableCell align="center">{value?.quantity}</TableCell>
+                        <TableCell align="right">{formatMoneyWithDot(value?.price * value?.quantity)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            ) : null}
+            {cartDetailAdd?.length > 0 ? (
+              <Box sx={{ margin: 4 }}>
+                <Typography variant="h6" gutterBottom component="div">
+                  Sản phẩm được thêm
+                </Typography>
+                <Table size="small" aria-label="purchases">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Tên sản phẩm</TableCell>
+                      <TableCell align="center">Số lượng</TableCell>
+                      <TableCell align="right">Giá tiền</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {cartDetailAdd?.map((value) => (
                       <TableRow key={value?.cartDesId}>
                         <TableCell component="th" scope="row" sx={{ width: '400px' }}>
                           {value?.product?.name}

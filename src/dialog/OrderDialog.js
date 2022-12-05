@@ -19,23 +19,21 @@ import { addCarDesAPI, getAllProductAPI } from '../components/services/index';
 export default function OrderDialog(props) {
   const { openDialog, setOpenDialog, listCart } = props;
   const [listProduct, setListProduct] = useState([]);
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(null);
   const [productAdd, setProductAdd] = useState([]);
-  const [productFocus, setProductFocus] = useState({});
+  const [productFocus, setProductFocus] = useState(null);
   const [openToastHere, setOpenToastHere] = useState(false);
   const [contentToastHere, setContentToastHere] = useState('');
   const [severityHere, setSeverityHere] = useState('');
   const [isError, setIsError] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [cartId, setCartId] = useState('');
+  const [cartId, setCartId] = useState(null);
 
   const addProduct = async () => {
     const data = {
       idCartDes: cartId,
       productAdd,
     };
-
-    console.log(data);
 
     try {
       const res = await addCarDesAPI(data);
@@ -73,13 +71,14 @@ export default function OrderDialog(props) {
   }, []);
 
   const handleClose = () => {
+    setCartId(null);
+    setProductAdd([]);
     setOpenDialog(false);
   };
 
   const handleAddProduct = () => {
     if (!cartId || !productAdd.length) {
       setIsError(true);
-      setErrorMsg('CartID || ProductAdd không có data');
     } else {
       setIsError(false);
       setErrorMsg('');
@@ -94,24 +93,24 @@ export default function OrderDialog(props) {
     } else {
       setIsError(false);
       setErrorMsg('');
-      console.log(productAdd);
-      const exist = productAdd?.find((value) => value.id === productFocus?.productId);
+      const exist = productAdd?.find((value) => value.id === productFocus?.id);
       if (exist) {
         setOpenToastHere(true);
         setContentToastHere('Sản phẩm này đã có trong giỏ hàng, không thể thêm vào nữa!!');
         setSeverityHere('error');
       } else {
         const data = {
-          productId: productFocus?._id,
-          id: productFocus?.productId,
+          id: productFocus?.id,
           quantity,
           name: productFocus?.name,
           price: productFocus?.price,
           productPrice: productFocus?.price,
           totalPrice: productFocus?.price * quantity,
-          typeProduct: 'waitingConfirm',
+          type: 'Báo giá',
         };
         setProductAdd([...productAdd, data]);
+				setQuantity("");
+				setProductFocus(null);
       }
     }
   };
@@ -125,10 +124,11 @@ export default function OrderDialog(props) {
             disablePortal
             id="cart"
             options={listCart}
-            getOptionLabel={(option) => option?.cartId}
+            getOptionLabel={(option) => option?.id.toString()}
             sx={{ mt: 2, mb: '60px' }}
             onChange={(e, newValue) => {
-              setCartId(newValue?._id);
+              console.log('newValue', newValue);
+              setCartId(newValue?.id);
             }}
             renderInput={(params) => <TextField {...params} label="Cart" />}
           />
@@ -144,7 +144,8 @@ export default function OrderDialog(props) {
               disablePortal
               id="product"
               options={listProduct}
-              getOptionLabel={(option) => option?.name}
+							value={productFocus}
+              getOptionLabel={(option) => option?.name.toString()}
               sx={{ width: 500, mr: 2 }}
               onChange={(e, newValue) => {
                 setProductFocus(newValue);
@@ -156,6 +157,7 @@ export default function OrderDialog(props) {
               label="Quantity"
               type="Number"
               fullWidth
+							value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               required
             />
@@ -196,10 +198,6 @@ export default function OrderDialog(props) {
       />
     </div>
   );
-}
-
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
 }
 
 function DenseTable({ productAdd }) {

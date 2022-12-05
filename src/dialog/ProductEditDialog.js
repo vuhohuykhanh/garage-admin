@@ -24,7 +24,6 @@ export default function ProductEditDialog(props) {
     setPrice(product?.price);
     setQuantity(product?.quantity);
     setManufacturer(product?.manufacturer);
-    console.log('product?.accessoryType', product?.accessoryType);
     setAccessoryType(product?.accessoryType);
   }, [product]);
 

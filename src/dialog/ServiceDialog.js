@@ -6,43 +6,44 @@ import Autocomplete from '@mui/material/Autocomplete';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import { getAllServiceTypeAPI } from '../components/services/index';
+import { getAllServiceTypeAPI, addNewProductAPI } from '../components/services/index';
 
 export default function ServiceDialog(props) {
   const { openDialog, setOpenDialog, getAllService, setContentToast, setSeverity, setOpenToast } = props;
   const [name, setName] = React.useState();
-  const [image, setImage] = React.useState();
   const [price, setPrice] = React.useState();
   const [serviceType, setServiceType] = React.useState();
   const [description, setDescription] = React.useState();
   const [isError, setIsError] = React.useState(false);
   const [listServiceType, setListServiceType] = React.useState();
+	const [selectedFile, setSelectedFile] = React.useState();
+	const [imageUrl, setImageUrl] = React.useState();
 
-  //const addNewService = async (data) => {
-  //  try {
-  //    const res = await addNewServiceAPI(data);
-  //    if (res.status === 200) {
-  //      setName(null);
-  //      setImage(null);
-  //      setPrice(null);
-  //      setServiceType(null);
-  //      setDescription(null);
-  //      setContentToast(res?.data);
-  //      setSeverity('success');
-  //      setOpenToast(true);
-  //      setOpenDialog(false);
-  //      getAllService();
-  //    } else {
-  //      setContentToast('Thêm dịch vụ thất bại');
-  //      setOpenToast(true);
-  //      setSeverity('error');
-  //    }
-  //  } catch (error) {
-  //    setContentToast('Thêm dịch vụ thất bại');
-  //    setOpenToast(true);
-  //    setSeverity('error');
-  //  }
-  //};
+
+  const addNewService = async (data) => {
+    try {
+      const res = await addNewProductAPI(data);
+      if (res.status === 200) {
+        setName(null);
+        setPrice(null);
+        setServiceType(null);
+        setDescription(null);
+        setContentToast(res?.data);
+        setSeverity('success');
+        setOpenToast(true);
+        setOpenDialog(false);
+        getAllService();
+      } else {
+        setContentToast('Thêm dịch vụ thất bại');
+        setOpenToast(true);
+        setSeverity('error');
+      }
+    } catch (error) {
+      setContentToast('Thêm dịch vụ thất bại');
+      setOpenToast(true);
+      setSeverity('error');
+    }
+  };
 
   const getAllServiceType = async () => {
     try {
@@ -60,45 +61,54 @@ export default function ServiceDialog(props) {
   const handleClose = () => {
     setOpenDialog(false);
     setName(null);
-    setImage(null);
     setPrice(null);
     setServiceType(null);
     setDescription(null);
   };
 
   const handleAddUser = () => {
-    if (!name || !image || !price || !serviceType || !description) {
+    if (!name || !price || !serviceType || !selectedFile) {
       setIsError(true);
-      const data = {
-        name,
-        image,
-        price,
-        serviceTypeId: serviceType,
-        description: [
-          {
-            type: 'Content',
-            content: description,
-          },
-        ],
-      };
-
     } else {
       setIsError(false);
-      const data = {
-        name,
-        image,
-        price,
-        serviceTypeId: serviceType,
-        description: [
-          {
-            type: 'Content',
-            content: description,
-          },
-        ],
-      };
-      //addNewService(data);
+      //const data = {
+      //  name,
+      //  price,
+			//	productType: 1,
+			//	quantity: 99999,
+      //  serviceType: serviceType?.id,
+      //  description: [
+      //    {
+      //      type: 'Content',
+      //      content: description,
+      //    },
+      //  ],
+      //};
+			const bodyFormData = new FormData();
+			bodyFormData.append('name', name);
+			bodyFormData.append('quantity', 99999);
+			bodyFormData.append('price', price);
+			bodyFormData.append('serviceType', serviceType?.id);
+			bodyFormData.append('productType', 1);
+			bodyFormData.append('image', selectedFile);
+
+      addNewService(bodyFormData);
     }
   };
+
+	const handleUploadImage = (e) => {
+		let file = e.target.files[0];
+		const reader = new FileReader();
+
+		reader.addEventListener("load", () => {
+			setImageUrl(reader.result)
+		}, false)
+
+		if(file) {
+			reader.readAsDataURL(file)
+			setSelectedFile(file)
+		}
+	}
 
   return (
     <div>
@@ -114,17 +124,6 @@ export default function ServiceDialog(props) {
             variant="outlined"
             sx={{ mt: 2 }}
             onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <TextField
-            margin="dense"
-            id="image"
-            label="Image URL"
-            type="text"
-            fullWidth
-            variant="outlined"
-            sx={{ mt: 2 }}
-            onChange={(e) => setImage(e.target.value)}
             required
           />
           <Box
@@ -148,10 +147,10 @@ export default function ServiceDialog(props) {
               disablePortal
               id="serviceType"
               options={listServiceType}
-              getOptionLabel={(option) => option?.serviceTypeName}
+              getOptionLabel={(option) => option?.name}
               sx={{ width: 500, mr: 2 }}
               onChange={(e, newValue) => {
-                setServiceType(newValue?._id);
+                setServiceType(newValue);
               }}
               renderInput={(params) => <TextField {...params} label="Service Type" />}
             />
@@ -168,6 +167,11 @@ export default function ServiceDialog(props) {
             onChange={(e) => setDescription(e.target.value)}
             required
           />
+					<Button variant="contained" component="label" sx={{ mt: 2, mb: 2 }}>
+            Upload Image
+            <input hidden accept="image/*" type="file" onChange={handleUploadImage} />
+          </Button>
+					{imageUrl && <img src={imageUrl} alt="ProductImage" />}
           <p
             style={{
               margin: '10px',

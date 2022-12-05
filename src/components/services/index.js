@@ -1,6 +1,6 @@
 import axios from 'axios';
 import {
-	SIGN_IN_ADMIN,
+  SIGN_IN_ADMIN,
   API_GET_ALL_USER_MAIN,
   API_GET_ALL_USER,
   API_ADD_NEW_USER,
@@ -10,7 +10,7 @@ import {
   API_GET_ALL_CART_DES,
   API_GET_CART_DESCRIPTION_BY_ID,
   API_ADD_CART_DES,
-  API_DELETE_CART_DES,
+  //API_DELETE_CART_DES,
   API_ADD_NEW_SERVICE,
   API_UPDATE_SERVICE,
   API_DELETE_SERVICE,
@@ -25,7 +25,7 @@ import {
   API_UPDATE_STATUS,
   API_GET_ALL_BILL,
   API_CREATE_BILL,
-	API_GET_ALL_ACCESSORY_TYPE,
+  API_GET_ALL_ACCESSORY_TYPE,
 } from './configs';
 
 export const loginAPI = async (body) => {
@@ -118,14 +118,14 @@ export const addCarDesAPI = async (body) => {
   }
 };
 
-export const getDeleteCartAPI = async (id) => {
-  try {
-    const response = await axios.delete(`${API_DELETE_CART_DES}?id=${id}`);
-    return response;
-  } catch (error) {
-    return error?.response?.data || error;
-  }
-};
+//export const getDeleteCartAPI = async (id) => {
+//  try {
+//    const response = await axios.delete(`${API_DELETE_CART_DES}?id=${id}`);
+//    return response;
+//  } catch (error) {
+//    return error?.response?.data || error;
+//  }
+//};
 
 export const getAllServicesAPI = async () => {
   try {
@@ -183,7 +183,12 @@ export const getAllProductAPI = async () => {
 
 export const addNewProductAPI = async (body) => {
   try {
-    const response = await axios.post(API_ADD_NEW_PRODUCT, body);
+    const response = await axios({
+      method: 'post',
+      url: API_ADD_NEW_PRODUCT,
+      data: body,
+      header: { 'Content-Type': 'multipart/form-data' },
+    });
     return response;
   } catch (error) {
     return error?.response?.data || error;

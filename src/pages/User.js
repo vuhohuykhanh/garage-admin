@@ -1,6 +1,5 @@
 import { filter } from 'lodash';
 import { useState, useEffect } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
 
 import axios from 'axios';
 // material
@@ -8,7 +7,6 @@ import {
   Card,
   Table,
   Stack,
-  Button,
   TableRow,
   TableBody,
   TableCell,
@@ -17,17 +15,14 @@ import {
   TableContainer,
   TablePagination,
 } from '@mui/material';
-import UserDialog from '../dialog/UserDialog';
-import UserEditDialog from '../dialog/UserEditDialog';
-import AppToast from '../myTool/AppToast';
 
 // components
+import formatMoneyWithDot from '../utils/formatMoney';
 import Page from '../components/Page';
 import Scrollbar from '../components/Scrollbar';
-import Iconify from '../components/Iconify';
 import SearchNotFound from '../components/SearchNotFound';
-import { UserListHead, UserListToolbar, UserMoreMenu } from '../sections/@dashboard/user';
-import { deleteUserAPI, getAllUserMainAPI } from '../components/services/index';
+import { UserListHead, UserListToolbar} from '../sections/@dashboard/user';
+import {getAllUserMainAPI } from '../components/services/index';
 
 // ----------------------------------------------------------------------
 
@@ -36,6 +31,8 @@ const TABLE_HEAD = [
   { id: 'phoneNumber', label: 'Phone Number', alignRight: false },
   { id: 'email', label: 'Email', alignRight: false },
   { id: 'address', label: 'Address', alignRight: false },
+  { id: 'purchase', label: 'Purchase Count Number', alignRight: false },
+  { id: 'totalMoney', label: 'Total Money Use', alignRight: false },
 ];
 
 // ----------------------------------------------------------------------
@@ -77,36 +74,12 @@ export default function User() {
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [listUser, setListUser] = useState();
-  const [openDialog, setOpenDialog] = useState(false);
-  const [openDialogEdit, setOpenDialogEdit] = useState(false);
-  const [openToast, setOpenToast] = useState(false);
-  const [contentToast, setContentToast] = useState('');
-  const [severity, setSeverity] = useState('');
-  const [currentUser, setCurrentUser] = useState({});
 
   const getAllUser = async () => {
     try {
       const res = await getAllUserMainAPI();
       const temp = res?.data;
       setListUser(temp);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const deleteAPI = async (id) => {
-    try {
-      const res = await deleteUserAPI(id);
-      if (res.status === 200) {
-        setContentToast(res?.data);
-        setSeverity('success');
-        setOpenToast(true);
-        getAllUser();
-      } else {
-        setContentToast(res?.data);
-        setSeverity('error');
-        setOpenToast(true);
-      }
     } catch (error) {
       console.log(error);
     }
@@ -129,10 +102,6 @@ export default function User() {
       return;
     }
     setSelected([]);
-  };
-
-  const handleAddUser = () => {
-    setOpenDialog(true);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -177,20 +146,10 @@ export default function User() {
           <Typography variant="h4" gutterBottom>
             Users
           </Typography>
-          {/* <Button
-            variant="contained"
-            component={RouterLink}
-            to="#"
-            startIcon={<Iconify icon="eva:plus-fill" />}
-            onClick={handleAddUser}
-          >
-            Add new user
-          </Button> */}
         </Stack>
 
         <Card>
           <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
-
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800 }}>
               <Table>
@@ -205,9 +164,13 @@ export default function User() {
                 />
                 <TableBody>
                   {filteredUsers?.map((row) => {
-										const {user} = row || {};
-                    const { name, idCardNumber, address, email, phoneNumber } = user;
+										const {user, purchaseCount} = row || {};
+                    const { name, address, email, phoneNumber, carts } = user;
                     const isItemSelected = selected.indexOf(phoneNumber) !== -1;
+
+										const totalMoneyUse = carts?.reduce((total, cur) => total += cur.totalPrice, 0)
+
+										console.log('totalMoneyUse', totalMoneyUse);
 
                     return (
                       <TableRow
@@ -223,6 +186,8 @@ export default function User() {
                         <TableCell align="center">{phoneNumber}</TableCell>
                         <TableCell align="center">{email}</TableCell>
                         <TableCell align="center">{address}</TableCell>
+                        <TableCell align="center">{purchaseCount}</TableCell>
+                        <TableCell align="center">{formatMoneyWithDot(totalMoneyUse)}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -257,15 +222,15 @@ export default function User() {
           />
         </Card>
       </Container>
-      <UserDialog
+      {/*<UserDialog
         openDialog={openDialog}
         setOpenDialog={setOpenDialog}
         getAllUser={getAllUser}
         setContentToast={setContentToast}
         setSeverity={setSeverity}
         setOpenToast={setOpenToast}
-      />
-      <UserEditDialog
+      />*/}
+      {/*<UserEditDialog
         user={currentUser}
         openDialog={openDialogEdit}
         setOpenDialog={setOpenDialogEdit}
@@ -273,8 +238,8 @@ export default function User() {
         setContentToast={setContentToast}
         setSeverity={setSeverity}
         setOpenToast={setOpenToast}
-      />
-      <AppToast
+      />*/}
+      {/*<AppToast
         content={contentToast}
         type={0}
         isOpen={openToast}
@@ -282,7 +247,7 @@ export default function User() {
         callback={() => {
           setOpenToast(false);
         }}
-      />
+      />*/}
     </Page>
   );
 }

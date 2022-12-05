@@ -19,6 +19,8 @@ export default function ProductDialog(props) {
   const [isError, setIsError] = React.useState(false);
   const [listManufacturer, setListManufacturer] = React.useState();
   const [listAccessoryType, setListAccessoryType] = React.useState();
+	const [selectedFile, setSelectedFile] = React.useState();
+	const [imageUrl, setImageUrl] = React.useState();
 
   const addNewProduct = async (data) => {
     try {
@@ -36,7 +38,6 @@ export default function ProductDialog(props) {
         setOpenDialog(false);
         getAllProduct();
       } else {
-        console.log(res);
         setContentToast('Thêm product thất bại');
         setOpenToast(true);
         setSeverity('error');
@@ -83,29 +84,52 @@ export default function ProductDialog(props) {
   };
 
   const handleAddProduct = () => {
-    if (!quantity || !name || !price || !manufacturer || !accessoryType) {
+    if (!quantity || !name || !price || !manufacturer || !accessoryType || !selectedFile) {
       setIsError(true);
     } else {
       setIsError(false);
-      const data = {
-        name,
-        quantity,
-        price,
-        manufacturer,
-        accessoryType,
-				productType: 2,
-        //description: [
-        //  {
-        //    type: 'Content',
-        //    description: description || '',
-        //  },
-        //],
-      };
+      //const data = {
+      //  name,
+      //  quantity,
+      //  price,
+      //  manufacturer,
+      //  accessoryType,
+      //  productType: 2,
+			//	image: selectedFile,
+      //  description: [
+      //    {
+      //      type: 'Content',
+      //      description: description || '',
+      //    },
+      //  ],
+      //};
+			const bodyFormData = new FormData();
+			bodyFormData.append('name', name);
+			bodyFormData.append('quantity', quantity);
+			bodyFormData.append('price', price);
+			bodyFormData.append('manufacturer', manufacturer);
+			bodyFormData.append('accessoryType', accessoryType);
+			bodyFormData.append('productType', 2);
+			bodyFormData.append('image', selectedFile);
 
       // CALL API add new product
-      addNewProduct(data);
+      addNewProduct(bodyFormData);
     }
   };
+
+	const handleUploadImage = (e) => {
+		let file = e.target.files[0];
+		const reader = new FileReader();
+
+		reader.addEventListener("load", () => {
+			setImageUrl(reader.result)
+		}, false)
+
+		if(file) {
+			reader.readAsDataURL(file)
+			setSelectedFile(file)
+		}
+	}
 
   return (
     <div>
@@ -127,7 +151,7 @@ export default function ProductDialog(props) {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              mt: 1,
+              mt: 2,
             }}
           >
             <TextField
@@ -153,7 +177,7 @@ export default function ProductDialog(props) {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              mt: 1,
+              mt: 2,
             }}
           >
             <Autocomplete
@@ -187,10 +211,15 @@ export default function ProductDialog(props) {
             multiline
             fullWidth
             variant="outlined"
-            sx={{ mt: 2 }}
+            sx={{ mt: 4 }}
             onChange={(e) => setDescription(e.target.value)}
             required
           />
+          <Button variant="contained" component="label" sx={{ mt: 2, mb: 2 }}>
+            Upload Image
+            <input hidden accept="image/*" type="file" onChange={handleUploadImage} />
+          </Button>
+					{imageUrl && <img src={imageUrl} alt="ProductImage" />}
           <p
             style={{
               margin: '10px',
