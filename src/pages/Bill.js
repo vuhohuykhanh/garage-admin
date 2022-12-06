@@ -1,6 +1,5 @@
 import { filter } from 'lodash';
 import React, { useState, useEffect } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
 // material
 import {
   Box,
@@ -28,13 +27,13 @@ import formatMoneyWithDot from '../utils/formatMoney';
 // components
 import Page from '../components/Page';
 import Scrollbar from '../components/Scrollbar';
-import Iconify from '../components/Iconify';
+import ExportExcel from '../components/exportExcel';
 import SearchNotFound from '../components/SearchNotFound';
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 
 // Chart
 import BarChart from '../chart/BarChart';
-import { UserData } from '../chart/data';
+import BarChartMonth from '../chart/BarChartMonth';
 
 // mock
 import { getAllBillAPI, getCartDescriptionAPI } from '../components/services/index';
@@ -49,8 +48,6 @@ const TABLE_HEAD = [
   { id: 'price', label: 'Price', alignRight: false },
   { id: 'confirmBy', label: 'Confirm By', alignRight: false },
 ];
-
-const style = require('./style.module.less');
 
 // ----------------------------------------------------------------------
 
@@ -91,8 +88,9 @@ export default function Bill() {
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [listBill, setListBill] = useState([]);
-  const [startDate, setStartDate] = useState('2022-08-01');
-  const [endDate, setEndDate] = useState('2022-09-30');
+  //const [startDate, setStartDate] = useState();
+  //const [endDate, setEndDate] = useState();
+	const [monthInChart, setMonthInChart] = useState('2022-12');
 
   const getAllBill = async () => {
     try {
@@ -141,6 +139,14 @@ export default function Bill() {
 
   const isUserNotFound = filteredUsers.length === 0;
 
+  const dataExportExcel = filteredUsers?.map((value) => ({
+    CartId: value?.id,
+    Owner: value?.customer?.name,
+    CreateAt: value?.createTime,
+    CompleteAt: value?.deleteAt,
+    Price: value?.totalPrice,
+    //ConfirmBy: value?.approvalEmployee
+  }));
   return (
     <Page title="Product">
       <Container maxWidth="xl">
@@ -148,6 +154,7 @@ export default function Bill() {
           <Typography variant="h4" gutterBottom>
             Bill
           </Typography>
+          <ExportExcel excelData={dataExportExcel} fileName={'Excel Export'} />
         </Stack>
 
         <Card>
@@ -167,8 +174,8 @@ export default function Bill() {
                 />
 
                 <TableBody>
-                  {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    return <Row row={row} />;
+                  {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => {
+                    return <Row row={row} key={index} />;
                   })}
                   {emptyRows > 0 && (
                     <TableRow style={{ height: 53 * emptyRows }}>
@@ -180,7 +187,7 @@ export default function Bill() {
                 {isUserNotFound && (
                   <TableBody>
                     <TableRow>
-                      <TableCell align="center" colSpan={7} sx={{ py: 3}}>
+                      <TableCell align="center" colSpan={7} sx={{ py: 3 }}>
                         <SearchNotFound searchQuery={filterName} />
                       </TableCell>
                     </TableRow>
@@ -202,6 +209,16 @@ export default function Bill() {
         </Card>
         <div style={{ marginTop: '150px' }}>
           <span style={{ marginBottom: '50px', display: 'inline-block' }}>
+            <span>Tháng: </span>
+            <input
+              style={{ width: '150px', height: '40px', padding: '15px', borderRadius: '8px', border: '1px solid #ccc' }}
+              onChange={(e) => setMonthInChart(e?.target?.value)}
+              type="month"
+              id="startDate"
+              value={monthInChart}
+            />
+          </span>
+          {/*<span style={{ marginBottom: '50px', display: 'inline-block' }}>
             <span>Ngày bắt đầu: </span>
             <input
               style={{ width: '150px', height: '40px', padding: '15px', borderRadius: '8px', border: '1px solid #ccc' }}
@@ -210,8 +227,8 @@ export default function Bill() {
               id="startDate"
               value={startDate}
             />
-          </span>
-          <span style={{ marginLeft: '30px' }}>
+          </span>*/}
+          {/*<span style={{ marginLeft: '30px' }}>
             <span>Ngày kết thúc: </span>
             <input
               style={{ width: '150px', height: '40px', padding: '15px', borderRadius: '8px', border: '1px solid #ccc' }}
@@ -220,8 +237,9 @@ export default function Bill() {
               id="endDate"
               value={endDate}
             />
-          </span>
+          </span>*/}
           {/*<BarChart data={filteredUsers} startDate={startDate} endDate={endDate} />*/}
+          <BarChartMonth data={filteredUsers} monthInChart={monthInChart} />
         </div>
       </Container>
     </Page>
@@ -234,9 +252,9 @@ function Row(props) {
     id,
     createTime,
     cart,
-		totalPrice,
-		customer: {name: userName},
-		deleteAt: completeAt,
+    totalPrice,
+    customer: { name: userName },
+    deleteAt: completeAt,
   } = row || {};
   const [open, setOpen] = React.useState(false);
   const [item, setItem] = useState([]);
@@ -269,14 +287,14 @@ function Row(props) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell component="th" scope="row">
+        <TableCell align="center" component="th" scope="row">
           {id}
         </TableCell>
         <TableCell align="center">{userName}</TableCell>
         <TableCell align="center">{formatDate(createTime)}</TableCell>
         <TableCell align="center">{formatDate(completeAt)}</TableCell>
         <TableCell align="center">{formatMoneyWithDot(totalPrice)}</TableCell>
-        <TableCell align="center">{"Chưa lấy được name"}</TableCell>
+        <TableCell align="center">{'Chưa lấy được name'}</TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>

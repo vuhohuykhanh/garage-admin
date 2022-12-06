@@ -34,6 +34,7 @@ import { deleteProductAPI, getAllServicesAPI } from '../components/services/inde
 
 const TABLE_HEAD = [
   { id: 'id', label: 'Service ID', alignRight: false },
+	{ id: 'image', label: 'Image', alignRight: false },
   { id: 'serviceName', label: 'Service Name', alignRight: false },
   { id: 'email', label: 'Price', alignRight: false },
   { id: 'address', label: 'Service Type', alignRight: false },
@@ -99,7 +100,7 @@ export default function Service() {
     try {
       const res = await deleteProductAPI(id);
       if (res.status === 200) {
-				console.log('res', res)
+        console.log('res', res);
         setContentToast(res?.data);
         setSeverity('success');
         setOpenToast(true);
@@ -159,7 +160,7 @@ export default function Service() {
       <Container maxWidth="xl">
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
-            List Service
+            Services
           </Typography>
           <Button
             variant="contained"
@@ -191,6 +192,7 @@ export default function Service() {
                   {filteredUsers?.map((row) => {
                     const {
                       id,
+											image,
                       name,
                       price,
                       serviceType: { name: serviceName },
@@ -210,6 +212,18 @@ export default function Service() {
                           {/* <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, name)} /> */}
                         </TableCell>
                         <TableCell align="center">{id}</TableCell>
+												<TableCell align="center" style={{ display: 'flex', justifyContent: 'center' }}>
+                          {
+                            <img
+                              width="180px"
+                              height="100px"
+                              src={
+                                image ? `http://localhost:5000/api/image/${image?.filename}` : require('../assets/images/bg1.png')
+                              }
+                              alt="detailImage"
+                            />
+                          }
+                        </TableCell>
                         <TableCell align="center">{name}</TableCell>
                         <TableCell align="center">{formatMoneyWithDot(price)}</TableCell>
                         <TableCell align="center">{serviceName}</TableCell>

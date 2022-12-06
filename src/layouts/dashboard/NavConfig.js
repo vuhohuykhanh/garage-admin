@@ -26,16 +26,16 @@ const navConfig = [
     path: '/dashboard/service',
     icon: getIcon('eva:lock-fill'),
   },
+	{
+		title: 'Sale',
+		path: '/dashboard/sale',
+		icon: getIcon('eva:file-text-fill'),
+	},
   {
     title: 'Order',
     path: '/dashboard/order',
     icon: getIcon('eva:alert-triangle-fill'),
   },
-  // {
-  //   title: 'blog',
-  //   path: '/dashboard/blog',
-  //   icon: getIcon('eva:file-text-fill'),
-  // },
   {
     title: 'Bill',
     path: '/dashboard/bill',

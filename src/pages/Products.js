@@ -34,6 +34,7 @@ import { deleteProductAPI, getAllProductAPI } from '../components/services/index
 
 const TABLE_HEAD = [
   { id: 'accessoryId', label: 'Accessory ID', alignRight: false },
+  { id: 'image', label: 'Image', alignRight: false },
   { id: 'name', label: 'Name', alignRight: false },
   { id: 'quantity', label: 'Quantity', alignRight: false },
   { id: 'price', label: 'Price', alignRight: false },
@@ -118,22 +119,6 @@ export default function User() {
     getAllProduct();
   }, []);
 
-  //const handleChangeStatus = (id) => {
-  //  const temp = listProduct?.filter((e) => e.id === id);
-  //  const tempArr = listProduct?.filter((e) => e.id !== id);
-  //  let temp1 = [];
-  //  if (temp[0].status === true) {
-  //    temp[0].status = false;
-  //    temp1 = temp;
-  //  } else {
-  //    temp[0].status = true;
-  //    temp1 = temp;
-  //  }
-  //  const temp2 = [...temp1, ...tempArr];
-  //  temp2.sort((a, b) => a.id - b.id);
-  //  setListProduct(temp2);
-  //};
-
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -177,7 +162,7 @@ export default function User() {
       <Container maxWidth="xl">
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
-            Product
+            Accessory
           </Typography>
           <Button
             variant="contained"
@@ -186,7 +171,7 @@ export default function User() {
             startIcon={<Iconify icon="eva:plus-fill" />}
             onClick={handleAddProduct}
           >
-            Add New Product
+            Add New Accessory
           </Button>
         </Stack>
 
@@ -208,7 +193,7 @@ export default function User() {
 
                 <TableBody>
                   {filteredUsers?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    const { id, name, quantity, price, manufacturer, accessoryType } = row;
+                    const { id, image, name, quantity, price, manufacturer, accessoryType } = row;
 
                     const isItemSelected = selected.indexOf(name) !== -1;
 
@@ -227,6 +212,18 @@ export default function User() {
 
                         <TableCell align="center" />
                         <TableCell align="center">{id}</TableCell>
+                        <TableCell align="center" style={{ display: 'flex', justifyContent: 'center' }}>
+                          {
+                            <img
+                              width="180px"
+                              height="100px"
+                              src={
+                                image ? `http://localhost:5000/api/image/${image?.filename}` : require('../assets/images/bg1.png')
+                              }
+                              alt="detailImage"
+                            />
+                          }
+                        </TableCell>
                         <TableCell align="center">{name}</TableCell>
                         <TableCell align="center">{quantity}</TableCell>
                         <TableCell align="center">{formatMoneyWithDot(price)}</TableCell>

@@ -148,7 +148,7 @@ export default function ServiceDialog(props) {
               id="serviceType"
               options={listServiceType}
               getOptionLabel={(option) => option?.name}
-              sx={{ width: 500, mr: 2 }}
+              sx={{ width: 500 }}
               onChange={(e, newValue) => {
                 setServiceType(newValue);
               }}

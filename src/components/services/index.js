@@ -10,10 +10,7 @@ import {
   API_GET_ALL_CART_DES,
   API_GET_CART_DESCRIPTION_BY_ID,
   API_ADD_CART_DES,
-  //API_DELETE_CART_DES,
-  API_ADD_NEW_SERVICE,
-  API_UPDATE_SERVICE,
-  API_DELETE_SERVICE,
+	API_GET_ALL_PRODUCT,
   API_GET_ALL_PRODUCT_BY_PRODUCT_TYPE,
   API_ADD_NEW_PRODUCT,
   API_UPDATE_PRODUCT,
@@ -26,6 +23,10 @@ import {
   API_GET_ALL_BILL,
   API_CREATE_BILL,
   API_GET_ALL_ACCESSORY_TYPE,
+	API_GET_ALL_SALE,
+	API_CREATE_SALE,
+	API_GET_SALE_DESCRIPTION,
+	API_CREATE_SALE_DESCRIPTION
 } from './configs';
 
 export const loginAPI = async (body) => {
@@ -171,6 +172,15 @@ export const getAllServicesAPI = async () => {
 //    return error?.response?.data || error;
 //  }
 //};
+export const getAllProductAndServiceAPI = async () => {
+  try {
+    const response = await axios.get(API_GET_ALL_PRODUCT);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};
+
 
 export const getAllProductAPI = async () => {
   try {
@@ -284,3 +294,43 @@ export const getAllAccessoryTypeAPI = async () => {
     return error?.response?.data || error;
   }
 };
+
+export const getAllSaleAPI = async () => {
+	try {
+		const response = await axios.get(API_GET_ALL_SALE);
+		return response;
+	} catch (error) {
+    return error?.response?.data || error;
+  }
+}
+
+//API_CREATE_SALE
+export const addNewSaleAPI = async (data) => {
+	try {
+		const response = await axios.post(API_CREATE_SALE, data);
+		return response;
+	} catch (error) {
+    return error?.response?.data || error;
+  }
+}
+
+//-----------------SALE_DESCRIPTION--------------
+//API_CREATE_SALE_DESCRIPTION
+export const addNewProductSaleAPI = async (data) => {
+	try {
+		const response = await axios.post(API_CREATE_SALE_DESCRIPTION, data);
+		return response;
+	} catch (error) {
+    return error?.response?.data || error;
+  }
+}
+
+//API_GET_SALE_DESCRIPTION_BY_ID
+export const getSaleDescriptionAPI = async (id) => {
+	try {
+		const response = await axios.get(`${API_GET_SALE_DESCRIPTION}?id=${id}`);
+		return response;
+	} catch (error) {
+    return error?.response?.data || error;
+  }
+}

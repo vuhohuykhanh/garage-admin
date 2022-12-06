@@ -8,6 +8,7 @@ import User from './pages/User';
 import Login from './pages/Login';
 import NotFound from './pages/Page404';
 import Bill from './pages/Bill';
+import Sale from './pages/Sale';
 import Service from './pages/Service';
 import Products from './pages/Products';
 import AddProduct from './pages/addProduct';
@@ -24,12 +25,13 @@ export default function Router() {
       children: [
         { path: 'user', element: <User /> },
         { path: 'accessory', element: <Products /> },
-        { path: 'order', element: <Blog /> },
         { path: 'service', element: <Service /> },
-        { path: 'addProduct', element: <AddProduct /> },
+        { path: 'sale', element: <Sale /> },
+        { path: 'order', element: <Blog /> },
         { path: 'bill', element: <Bill /> },
-        { path: 'updateProduct/', element: <UpdProduct /> },
-        { path: 'orderDetail/', element: <DetailOrder /> },
+        //{ path: 'addProduct', element: <AddProduct /> },
+        //{ path: 'orderDetail/', element: <DetailOrder /> },
+        //{ path: 'updateProduct/', element: <UpdProduct /> },
       ],
     },
     {
