@@ -8,7 +8,6 @@ import {
   API_DELETE_USER,
   API_GET_ALL_CART,
   API_GET_ALL_CART_DES,
-  API_GET_CART_DESCRIPTION_BY_ID,
   API_ADD_CART_DES,
 	API_GET_ALL_PRODUCT,
   API_GET_ALL_PRODUCT_BY_PRODUCT_TYPE,
@@ -26,7 +25,9 @@ import {
 	API_GET_ALL_SALE,
 	API_CREATE_SALE,
 	API_GET_SALE_DESCRIPTION,
-	API_CREATE_SALE_DESCRIPTION
+	API_CREATE_SALE_DESCRIPTION,
+	API_GET_CART_DESCRIPTION_BY_ID,
+	API_GET_CART_BY_USER_ID,
 } from './configs';
 
 export const loginAPI = async (body) => {
@@ -86,6 +87,15 @@ export const deleteUserAPI = async (id) => {
 export const getAllCartAPI = async () => {
   try {
     const response = await axios.get(API_GET_ALL_CART);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};
+
+export const getCartByUserIdAPI = async (id) => {
+	try {
+    const response = await axios.get(`${API_GET_CART_BY_USER_ID}?idCardNumber=${id}`);
     return response;
   } catch (error) {
     return error?.response?.data || error;

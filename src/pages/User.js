@@ -9,8 +9,12 @@ import {
   Stack,
   TableRow,
   TableBody,
+	TableHead,
+	Box,
+	Collapse,
   TableCell,
   Container,
+  IconButton,
   Typography,
   TableContainer,
   TablePagination,
@@ -21,8 +25,11 @@ import formatMoneyWithDot from '../utils/formatMoney';
 import Page from '../components/Page';
 import Scrollbar from '../components/Scrollbar';
 import SearchNotFound from '../components/SearchNotFound';
-import { UserListHead, UserListToolbar} from '../sections/@dashboard/user';
-import {getAllUserMainAPI } from '../components/services/index';
+import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
+import { getAllUserMainAPI, getCartByUserIdAPI } from '../components/services/index';
+
+import KeyboardArrowUpIcon from '@mui/icons-material/ArrowDownward';
+import KeyboardArrowDownIcon from '@mui/icons-material/ArrowUpward';
 
 // ----------------------------------------------------------------------
 
@@ -75,6 +82,15 @@ export default function User() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [listUser, setListUser] = useState();
 
+  const [open, setOpen] = useState(false);
+  const [listCart, setListCart] = useState([]);
+
+	function formatDate(str) {
+		const date = str.split('T');
+		const day = date[0].split('-');
+		return day[2] + '/' + day[1] + '/' + day[0];
+	}
+
   const getAllUser = async () => {
     try {
       const res = await getAllUserMainAPI();
@@ -117,21 +133,17 @@ export default function User() {
     setFilterName(event.target.value);
   };
 
-  //const handleChangeStatus = (id) => {
-  //  const temp = listUser.filter((e) => e.id === id);
-  //  const tempArr = listUser.filter((e) => e.id !== id);
-  //  let temp1 = [];
-  //  if (temp[0].status === true) {
-  //    temp[0].status = false;
-  //    temp1 = temp;
-  //  } else {
-  //    temp[0].status = true;
-  //    temp1 = temp;
-  //  }
-  //  const temp2 = [...temp1, ...tempArr];
-  //  temp2.sort((a, b) => a.id - b.id);
-  //  setListUser(temp2);
-  //};
+  const getCartByUserId = async (id) => {
+    try {
+      const res = await getCartByUserIdAPI(id);
+      setListCart(res?.data);
+    } catch (error) {}
+  };
+
+  const handleClick = (id) => {
+    setOpen(!open);
+    getCartByUserId(id);
+  };
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - listUser.length) : 0;
 
@@ -164,31 +176,72 @@ export default function User() {
                 />
                 <TableBody>
                   {filteredUsers?.map((row) => {
-										const {user, purchaseCount} = row || {};
-                    const { name, address, email, phoneNumber, carts } = user;
+                    const { user, purchaseCount } = row || {};
+                    const { idCardNumber, name, address, email, phoneNumber, carts } = user;
                     const isItemSelected = selected.indexOf(phoneNumber) !== -1;
 
-										const totalMoneyUse = carts?.reduce((total, cur) => total += cur.totalPrice, 0)
-
-										console.log('totalMoneyUse', totalMoneyUse);
+                    const totalMoneyUse = carts?.reduce((total, cur) => (total += cur.totalPrice), 0);
 
                     return (
-                      <TableRow
-                        hover
-                        key={phoneNumber}
-                        tabIndex={-1}
-                        role="checkbox"
-                        selected={isItemSelected}
-                        aria-checked={isItemSelected}
-                      >
-												<TableCell />
-                        <TableCell align="center">{name}</TableCell>
-                        <TableCell align="center">{phoneNumber}</TableCell>
-                        <TableCell align="center">{email}</TableCell>
-                        <TableCell align="center">{address}</TableCell>
-                        <TableCell align="center">{purchaseCount}</TableCell>
-                        <TableCell align="center">{formatMoneyWithDot(totalMoneyUse)}</TableCell>
-                      </TableRow>
+                      <>
+                        <TableRow
+                          hover
+                          key={phoneNumber}
+                          tabIndex={-1}
+                          role="checkbox"
+                          selected={isItemSelected}
+                          aria-checked={isItemSelected}
+                        >
+                          <TableCell>
+                            <IconButton aria-label="expand row" size="small" onClick={() => handleClick(idCardNumber)}>
+                              {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                            </IconButton>
+                          </TableCell>
+                          <TableCell align="center">{name}</TableCell>
+                          <TableCell align="center">{phoneNumber}</TableCell>
+                          <TableCell align="center">{email}</TableCell>
+                          <TableCell align="center">{address}</TableCell>
+                          <TableCell align="center">{purchaseCount}</TableCell>
+                          <TableCell align="center">{formatMoneyWithDot(totalMoneyUse)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+                            <Collapse in={open} timeout="auto" unmountOnExit>
+                              {listCart?.length > 0 ? (
+                                <Box sx={{ margin: 4 }}>
+                                  <Typography variant="h6" gutterBottom component="div">
+																		Đơn hàng
+                                  </Typography>
+                                  <Table size="small" aria-label="purchases">
+                                    <TableHead>
+                                      <TableRow>
+                                        <TableCell align="center">Mã đơn hàng</TableCell>
+                                        <TableCell align="center">Thời gian tạo</TableCell>
+                                        <TableCell align="center">Trạng thái</TableCell>
+                                        <TableCell align="center">Giá</TableCell>
+                                      </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                      {listCart?.map((value) => (
+                                        <TableRow key={value?.id}>
+                                          <TableCell align="center" component="th" scope="row" sx={{ width: '400px' }}>
+                                            {value?.id}
+                                          </TableCell>
+                                          <TableCell align="center">{formatDate(value?.createTime)}</TableCell>
+                                          <TableCell align="center">{value?.status?.name}</TableCell>
+                                          <TableCell align="center">
+                                            {formatMoneyWithDot(value?.totalPrice)}
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </Box>
+                              ) : null}
+                            </Collapse>
+                          </TableCell>
+                        </TableRow>
+                      </>
                     );
                   })}
                   {emptyRows > 0 && (
@@ -222,32 +275,6 @@ export default function User() {
           />
         </Card>
       </Container>
-      {/*<UserDialog
-        openDialog={openDialog}
-        setOpenDialog={setOpenDialog}
-        getAllUser={getAllUser}
-        setContentToast={setContentToast}
-        setSeverity={setSeverity}
-        setOpenToast={setOpenToast}
-      />*/}
-      {/*<UserEditDialog
-        user={currentUser}
-        openDialog={openDialogEdit}
-        setOpenDialog={setOpenDialogEdit}
-        getAllUser={getAllUser}
-        setContentToast={setContentToast}
-        setSeverity={setSeverity}
-        setOpenToast={setOpenToast}
-      />*/}
-      {/*<AppToast
-        content={contentToast}
-        type={0}
-        isOpen={openToast}
-        severity={severity}
-        callback={() => {
-          setOpenToast(false);
-        }}
-      />*/}
     </Page>
   );
 }

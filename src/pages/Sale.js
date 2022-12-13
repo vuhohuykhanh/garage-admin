@@ -246,7 +246,7 @@ export default function Service() {
         setSeverity={setSeverity}
         setOpenToast={setOpenToast}
       />
-			<ProductSaleDialog
+      <ProductSaleDialog
         openDialog={openDialogAddProductSale}
         setOpenDialog={setOpenDialogAddProductSale}
         getAllSale={getAllSale}

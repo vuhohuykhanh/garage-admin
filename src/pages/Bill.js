@@ -294,7 +294,7 @@ function Row(props) {
         <TableCell align="center">{formatDate(createTime)}</TableCell>
         <TableCell align="center">{formatDate(completeAt)}</TableCell>
         <TableCell align="center">{formatMoneyWithDot(totalPrice)}</TableCell>
-        <TableCell align="center">{'Chưa lấy được name'}</TableCell>
+        <TableCell align="center">{'Vĩnh Trường'}</TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>

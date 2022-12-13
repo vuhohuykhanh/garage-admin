@@ -16,6 +16,8 @@ export const API_GET_ALL_CART = `${BASE_URL}/cart/get-all`;
 export const API_GET_ALL_BILL = `${BASE_URL}/cart/get-bill`;
 export const API_UPDATE_STATUS = `${BASE_URL}/cart/update-status`;
 export const API_CREATE_BILL = `${BASE_URL}/cart/delete-soft`;
+export const API_GET_CART_BY_USER_ID = `${BASE_URL}/cart/get-cart-by-user-id`;
+
 
 export const API_ADD_CART_DES = `${BASE_URL}/cart-description/add`;
 //export const API_DELETE_CART_DES = `${BASE_URL}/cart-description/delete`;

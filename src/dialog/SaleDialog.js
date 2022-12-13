@@ -83,6 +83,7 @@ export default function SaleDialog(props) {
           <DatePicker
             label="Start day"
             value={startTime}
+						minDate={new Date()}
             onChange={(newValue) => {
               setStartTime(newValue);
             }}
@@ -91,6 +92,7 @@ export default function SaleDialog(props) {
           <DatePicker
             label="End day"
             value={endTime}
+						minDate={new Date()}
             sx={{ width: 500 }}
             onChange={(newValue) => {
               setEndTime(newValue);

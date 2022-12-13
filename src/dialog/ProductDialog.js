@@ -84,7 +84,7 @@ export default function ProductDialog(props) {
   };
 
   const handleAddProduct = () => {
-    if (!quantity || !name || !price || !manufacturer || !accessoryType || !selectedFile) {
+    if (!quantity || !name || !price || !manufacturer || !accessoryType || !selectedFile || description) {
       setIsError(true);
     } else {
       setIsError(false);
