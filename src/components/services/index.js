@@ -9,7 +9,7 @@ import {
   API_GET_ALL_CART,
   API_GET_ALL_CART_DES,
   API_ADD_CART_DES,
-	API_GET_ALL_PRODUCT,
+  API_GET_ALL_PRODUCT,
   API_GET_ALL_PRODUCT_BY_PRODUCT_TYPE,
   API_ADD_NEW_PRODUCT,
   API_UPDATE_PRODUCT,
@@ -22,12 +22,12 @@ import {
   API_GET_ALL_BILL,
   API_CREATE_BILL,
   API_GET_ALL_ACCESSORY_TYPE,
-	API_GET_ALL_SALE,
-	API_CREATE_SALE,
-	API_GET_SALE_DESCRIPTION,
-	API_CREATE_SALE_DESCRIPTION,
-	API_GET_CART_DESCRIPTION_BY_ID,
-	API_GET_CART_BY_USER_ID,
+  API_GET_ALL_SALE,
+  API_CREATE_SALE,
+  API_GET_SALE_DESCRIPTION,
+  API_CREATE_SALE_DESCRIPTION,
+  API_GET_CART_DESCRIPTION_BY_ID,
+  API_GET_CART_BY_USER_ID,
 } from './configs';
 
 export const loginAPI = async (body) => {
@@ -94,7 +94,7 @@ export const getAllCartAPI = async () => {
 };
 
 export const getCartByUserIdAPI = async (id) => {
-	try {
+  try {
     const response = await axios.get(`${API_GET_CART_BY_USER_ID}?idCardNumber=${id}`);
     return response;
   } catch (error) {
@@ -190,7 +190,6 @@ export const getAllProductAndServiceAPI = async () => {
     return error?.response?.data || error;
   }
 };
-
 
 export const getAllProductAPI = async () => {
   try {
@@ -306,41 +305,41 @@ export const getAllAccessoryTypeAPI = async () => {
 };
 
 export const getAllSaleAPI = async () => {
-	try {
-		const response = await axios.get(API_GET_ALL_SALE);
-		return response;
-	} catch (error) {
+  try {
+    const response = await axios.get(API_GET_ALL_SALE);
+    return response;
+  } catch (error) {
     return error?.response?.data || error;
   }
-}
+};
 
 //API_CREATE_SALE
 export const addNewSaleAPI = async (data) => {
-	try {
-		const response = await axios.post(API_CREATE_SALE, data);
-		return response;
-	} catch (error) {
+  try {
+    const response = await axios.post(API_CREATE_SALE, data);
+    return response;
+  } catch (error) {
     return error?.response?.data || error;
   }
-}
+};
 
 //-----------------SALE_DESCRIPTION--------------
 //API_CREATE_SALE_DESCRIPTION
 export const addNewProductSaleAPI = async (data) => {
-	try {
-		const response = await axios.post(API_CREATE_SALE_DESCRIPTION, data);
-		return response;
-	} catch (error) {
+  try {
+    const response = await axios.post(API_CREATE_SALE_DESCRIPTION, data);
+    return response;
+  } catch (error) {
     return error?.response?.data || error;
   }
-}
+};
 
 //API_GET_SALE_DESCRIPTION_BY_ID
 export const getSaleDescriptionAPI = async (id) => {
-	try {
-		const response = await axios.get(`${API_GET_SALE_DESCRIPTION}?id=${id}`);
-		return response;
-	} catch (error) {
+  try {
+    const response = await axios.get(`${API_GET_SALE_DESCRIPTION}?id=${id}`);
+    return response;
+  } catch (error) {
     return error?.response?.data || error;
   }
-}
+};

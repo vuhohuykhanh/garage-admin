@@ -9,9 +9,9 @@ import {
   Stack,
   TableRow,
   TableBody,
-	TableHead,
-	Box,
-	Collapse,
+  TableHead,
+  Box,
+  Collapse,
   TableCell,
   Container,
   IconButton,
@@ -68,7 +68,7 @@ function applySortFilter(array, comparator, query) {
     return a[1] - b[1];
   });
   if (query) {
-    return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+    return filter(array, (item) => item?.user?.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
   }
   return stabilizedThis?.map((el) => el[0]);
 }
@@ -81,15 +81,6 @@ export default function User() {
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [listUser, setListUser] = useState();
-
-  const [open, setOpen] = useState(false);
-  const [listCart, setListCart] = useState([]);
-
-	function formatDate(str) {
-		const date = str.split('T');
-		const day = date[0].split('-');
-		return day[2] + '/' + day[1] + '/' + day[0];
-	}
 
   const getAllUser = async () => {
     try {
@@ -133,17 +124,7 @@ export default function User() {
     setFilterName(event.target.value);
   };
 
-  const getCartByUserId = async (id) => {
-    try {
-      const res = await getCartByUserIdAPI(id);
-      setListCart(res?.data);
-    } catch (error) {}
-  };
-
-  const handleClick = (id) => {
-    setOpen(!open);
-    getCartByUserId(id);
-  };
+	console.log("FilterName", filterName);
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - listUser.length) : 0;
 
@@ -175,74 +156,8 @@ export default function User() {
                   onSelectAllClick={handleSelectAllClick}
                 />
                 <TableBody>
-                  {filteredUsers?.map((row) => {
-                    const { user, purchaseCount } = row || {};
-                    const { idCardNumber, name, address, email, phoneNumber, carts } = user;
-                    const isItemSelected = selected.indexOf(phoneNumber) !== -1;
-
-                    const totalMoneyUse = carts?.reduce((total, cur) => (total += cur.totalPrice), 0);
-
-                    return (
-                      <>
-                        <TableRow
-                          hover
-                          key={phoneNumber}
-                          tabIndex={-1}
-                          role="checkbox"
-                          selected={isItemSelected}
-                          aria-checked={isItemSelected}
-                        >
-                          <TableCell>
-                            <IconButton aria-label="expand row" size="small" onClick={() => handleClick(idCardNumber)}>
-                              {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                            </IconButton>
-                          </TableCell>
-                          <TableCell align="center">{name}</TableCell>
-                          <TableCell align="center">{phoneNumber}</TableCell>
-                          <TableCell align="center">{email}</TableCell>
-                          <TableCell align="center">{address}</TableCell>
-                          <TableCell align="center">{purchaseCount}</TableCell>
-                          <TableCell align="center">{formatMoneyWithDot(totalMoneyUse)}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
-                            <Collapse in={open} timeout="auto" unmountOnExit>
-                              {listCart?.length > 0 ? (
-                                <Box sx={{ margin: 4 }}>
-                                  <Typography variant="h6" gutterBottom component="div">
-																		Đơn hàng
-                                  </Typography>
-                                  <Table size="small" aria-label="purchases">
-                                    <TableHead>
-                                      <TableRow>
-                                        <TableCell align="center">Mã đơn hàng</TableCell>
-                                        <TableCell align="center">Thời gian tạo</TableCell>
-                                        <TableCell align="center">Trạng thái</TableCell>
-                                        <TableCell align="center">Giá</TableCell>
-                                      </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                      {listCart?.map((value) => (
-                                        <TableRow key={value?.id}>
-                                          <TableCell align="center" component="th" scope="row" sx={{ width: '400px' }}>
-                                            {value?.id}
-                                          </TableCell>
-                                          <TableCell align="center">{formatDate(value?.createTime)}</TableCell>
-                                          <TableCell align="center">{value?.status?.name}</TableCell>
-                                          <TableCell align="center">
-                                            {formatMoneyWithDot(value?.totalPrice)}
-                                          </TableCell>
-                                        </TableRow>
-                                      ))}
-                                    </TableBody>
-                                  </Table>
-                                </Box>
-                              ) : null}
-                            </Collapse>
-                          </TableCell>
-                        </TableRow>
-                      </>
-                    );
+                  {filteredUsers?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)?.map((row, index) => {
+                    return <Row row={row} key={index} selected={selected} />;
                   })}
                   {emptyRows > 0 && (
                     <TableRow style={{ height: 53 * emptyRows }}>
@@ -265,7 +180,7 @@ export default function User() {
           </Scrollbar>
 
           <TablePagination
-            rowsPerPageOptions={[1, 5, 10]}
+            rowsPerPageOptions={[5, 10, 25]}
             component="div"
             count={listUser?.length}
             rowsPerPage={rowsPerPage}
@@ -276,5 +191,94 @@ export default function User() {
         </Card>
       </Container>
     </Page>
+  );
+}
+
+function Row({ row, index, selected }) {
+  const [open, setOpen] = useState(false);
+  const [listCart, setListCart] = useState([]);
+
+  function formatDate(str) {
+    const date = str.split('T');
+    const day = date[0].split('-');
+    return day[2] + '/' + day[1] + '/' + day[0];
+  }
+
+  const { user, purchaseCount } = row || {};
+  const { idCardNumber, name, address, email, phoneNumber, carts } = user;
+  const isItemSelected = selected.indexOf(phoneNumber) !== -1;
+
+  const totalMoneyUse = carts?.reduce((total, cur) => (total += cur.totalPrice), 0);
+
+  const getCartByUserId = async (id) => {
+    try {
+      const res = await getCartByUserIdAPI(id);
+      setListCart(res?.data);
+    } catch (error) {}
+  };
+
+  const handleClick = (id) => {
+    setOpen(!open);
+    getCartByUserId(id);
+  };
+
+  return (
+    <>
+      <TableRow
+        hover
+        key={phoneNumber}
+        tabIndex={-1}
+        role="checkbox"
+        selected={isItemSelected}
+        aria-checked={isItemSelected}
+      >
+        <TableCell>
+          <IconButton aria-label="expand row" size="small" onClick={() => handleClick(idCardNumber)}>
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
+        <TableCell align="center">{name}</TableCell>
+        <TableCell align="center">{phoneNumber}</TableCell>
+        <TableCell align="center">{email}</TableCell>
+        <TableCell align="center">{address}</TableCell>
+        <TableCell align="center">{purchaseCount}</TableCell>
+        <TableCell align="center">{formatMoneyWithDot(totalMoneyUse)}</TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            {listCart?.length > 0 ? (
+              <Box sx={{ margin: 4 }}>
+                <Typography variant="h6" gutterBottom component="div">
+                  Đơn hàng
+                </Typography>
+                <Table size="small" aria-label="purchases">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell align="center">Mã đơn hàng</TableCell>
+                      <TableCell align="center">Thời gian tạo</TableCell>
+                      <TableCell align="center">Trạng thái</TableCell>
+                      <TableCell align="center">Giá</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {listCart?.map((value) => (
+                      <TableRow key={value?.id}>
+                        <TableCell align="center" component="th" scope="row" sx={{ width: '400px' }}>
+                          {value?.id}
+                        </TableCell>
+                        <TableCell align="center">{formatDate(value?.createTime)}</TableCell>
+                        <TableCell align="center">{value?.status?.name}</TableCell>
+                        <TableCell align="center">{formatMoneyWithDot(value?.totalPrice)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            ) : null}
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </>
   );
 }

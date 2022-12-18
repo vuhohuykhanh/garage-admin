@@ -75,21 +75,19 @@ function applySortFilter(array, comparator, query) {
     return a[1] - b[1];
   });
   if (query) {
-    return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+    return filter(array, (_user) => _user?.customer?.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
   }
   return stabilizedThis.map((el) => el[0]);
 }
 
 export default function Bill() {
   const [page, setPage] = useState(0);
-  const [order, setOrder] = useState('asc');
+  const [order, setOrder] = useState('desc');
   const [selected, setSelected] = useState([]);
   const [orderBy, setOrderBy] = useState('id');
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [listBill, setListBill] = useState([]);
-  //const [startDate, setStartDate] = useState();
-  //const [endDate, setEndDate] = useState();
 	const [monthInChart, setMonthInChart] = useState('2022-12');
 
   const getAllBill = async () => {
@@ -134,9 +132,7 @@ export default function Bill() {
   };
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - listBill?.length) : 0;
-
   const filteredUsers = applySortFilter(listBill, getComparator(order, orderBy), filterName);
-
   const isUserNotFound = filteredUsers.length === 0;
 
   const dataExportExcel = filteredUsers?.map((value) => ({

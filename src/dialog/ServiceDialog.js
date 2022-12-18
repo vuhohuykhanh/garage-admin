@@ -67,7 +67,7 @@ export default function ServiceDialog(props) {
   };
 
   const handleAddUser = () => {
-    if (!name || !price || !serviceType || !selectedFile) {
+    if (!name || !price || !serviceType || !selectedFile || !description) {
       setIsError(true);
     } else {
       setIsError(false);
@@ -91,6 +91,7 @@ export default function ServiceDialog(props) {
 			bodyFormData.append('serviceType', serviceType?.id);
 			bodyFormData.append('productType', 1);
 			bodyFormData.append('image', selectedFile);
+			bodyFormData.append('description', description);
 
       addNewService(bodyFormData);
     }

@@ -84,7 +84,7 @@ export default function ProductDialog(props) {
   };
 
   const handleAddProduct = () => {
-    if (!quantity || !name || !price || !manufacturer || !accessoryType || !selectedFile || description) {
+    if (!quantity || !name || !price || !manufacturer || !accessoryType || !selectedFile || !description) {
       setIsError(true);
     } else {
       setIsError(false);
@@ -111,6 +111,7 @@ export default function ProductDialog(props) {
 			bodyFormData.append('accessoryType', accessoryType);
 			bodyFormData.append('productType', 2);
 			bodyFormData.append('image', selectedFile);
+			bodyFormData.append('description', description);
 
       // CALL API add new product
       addNewProduct(bodyFormData);

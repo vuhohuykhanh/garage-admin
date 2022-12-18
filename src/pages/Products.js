@@ -62,7 +62,6 @@ function getComparator(order, orderBy) {
 
 function applySortFilter(array, comparator, query) {
   const stabilizedThis = array?.map((el, index) => [el, index]);
-	console.log("stabilizedThis", stabilizedThis)
   stabilizedThis?.sort((a, b) => {
     const order = comparator(a[0], b[0]);
     if (order !== 0) return order;
@@ -78,7 +77,7 @@ export default function User() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState('asc');
   const [selected, setSelected] = useState([]);
-  const [orderBy, setOrderBy] = useState('name');
+  const [orderBy, setOrderBy] = useState('id');
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openDialog, setOpenDialog] = useState(false);
@@ -219,7 +218,9 @@ export default function User() {
                               width="180px"
                               height="100px"
                               src={
-                                image ? `http://localhost:5000/api/image/${image?.filename}` : require('../assets/images/bg1.png')
+                                image
+                                  ? `http://localhost:5000/api/image/${image?.filename}`
+                                  : require('../assets/images/bg1.png')
                               }
                               alt="detailImage"
                             />

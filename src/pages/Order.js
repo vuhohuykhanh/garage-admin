@@ -76,6 +76,7 @@ function getComparator(order, orderBy) {
 }
 
 function applySortFilter(array, comparator, query) {
+	console.log("array", array);
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -83,7 +84,7 @@ function applySortFilter(array, comparator, query) {
     return a[1] - b[1];
   });
   if (query) {
-    return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+    return filter(array, (_user) => _user?.customer?.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
   }
   return stabilizedThis.map((el) => el[0]);
 }
@@ -156,7 +157,6 @@ export default function User() {
   };
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - listCart.length) : 0;
-
   const filteredUsers = applySortFilter(listCart, getComparator(order, orderBy), filterName);
 
   return (
@@ -207,7 +207,7 @@ export default function User() {
           </Scrollbar>
 
           <TablePagination
-            rowsPerPageOptions={[1, 5, 10]}
+            rowsPerPageOptions={[5, 10, 25]}
             component="div"
             createTime
             count={listCart.length}
@@ -332,6 +332,9 @@ const Row = ({ row, listStatus, getAllCart }) => {
     }
   };
 
+	console.log("cartDetail", cartDetail)
+	console.log("cartDetailAdd", cartDetailAdd)
+
   const handleClick = () => {
     if (!openDetailCart) getCartDescription(cartId);
     setOpenDetailCart(!openDetailCart);
@@ -386,8 +389,9 @@ const Row = ({ row, listStatus, getAllCart }) => {
                   <TableHead>
                     <TableRow>
                       <TableCell>Tên sản phẩm</TableCell>
+                      <TableCell align="center">Giá</TableCell>
                       <TableCell align="center">Số lượng</TableCell>
-                      <TableCell align="right">Giá tiền</TableCell>
+                      <TableCell align="right">Tổng</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -396,6 +400,7 @@ const Row = ({ row, listStatus, getAllCart }) => {
                         <TableCell component="th" scope="row" sx={{ width: '400px' }}>
                           {value?.product?.name}
                         </TableCell>
+                        <TableCell align="center">{formatMoneyWithDot(value?.price)}</TableCell>
                         <TableCell align="center">{value?.quantity}</TableCell>
                         <TableCell align="right">{formatMoneyWithDot(value?.price * value?.quantity)}</TableCell>
                       </TableRow>
@@ -413,8 +418,9 @@ const Row = ({ row, listStatus, getAllCart }) => {
                   <TableHead>
                     <TableRow>
                       <TableCell>Tên sản phẩm</TableCell>
+                      <TableCell align="center">Giá</TableCell>
                       <TableCell align="center">Số lượng</TableCell>
-                      <TableCell align="right">Giá tiền</TableCell>
+                      <TableCell align="right">Tổng</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -423,6 +429,7 @@ const Row = ({ row, listStatus, getAllCart }) => {
                         <TableCell component="th" scope="row" sx={{ width: '400px' }}>
                           {value?.product?.name}
                         </TableCell>
+                        <TableCell align="center">{formatMoneyWithDot(value?.price)}</TableCell>
                         <TableCell align="center">{value?.quantity}</TableCell>
                         <TableCell align="right">{formatMoneyWithDot(value?.price * value?.quantity)}</TableCell>
                       </TableRow>

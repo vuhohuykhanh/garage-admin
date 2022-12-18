@@ -34,7 +34,7 @@ import { deleteProductAPI, getAllServicesAPI } from '../components/services/inde
 
 const TABLE_HEAD = [
   { id: 'id', label: 'Service ID', alignRight: false },
-	{ id: 'image', label: 'Image', alignRight: false },
+  { id: 'image', label: 'Image', alignRight: false },
   { id: 'serviceName', label: 'Service Name', alignRight: false },
   { id: 'email', label: 'Price', alignRight: false },
   { id: 'address', label: 'Service Type', alignRight: false },
@@ -75,7 +75,7 @@ export default function Service() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState('asc');
   const [selected, setSelected] = useState([]);
-  const [orderBy, setOrderBy] = useState('name');
+  const [orderBy, setOrderBy] = useState('id');
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [listService, setListService] = useState();
@@ -189,10 +189,10 @@ export default function Service() {
                   onSelectAllClick={handleSelectAllClick}
                 />
                 <TableBody>
-                  {filteredUsers?.map((row) => {
+                  {filteredUsers?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)?.map((row) => {
                     const {
                       id,
-											image,
+                      image,
                       name,
                       price,
                       serviceType: { name: serviceName },
@@ -212,13 +212,15 @@ export default function Service() {
                           {/* <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, name)} /> */}
                         </TableCell>
                         <TableCell align="center">{id}</TableCell>
-												<TableCell align="center" style={{ display: 'flex', justifyContent: 'center' }}>
+                        <TableCell align="center" style={{ display: 'flex', justifyContent: 'center' }}>
                           {
                             <img
                               width="180px"
                               height="100px"
                               src={
-                                image ? `http://localhost:5000/api/image/${image?.filename}` : require('../assets/images/bg1.png')
+                                image
+                                  ? `http://localhost:5000/api/image/${image?.filename}`
+                                  : require('../assets/images/bg1.png')
                               }
                               alt="detailImage"
                             />
@@ -266,7 +268,7 @@ export default function Service() {
           </Scrollbar>
 
           <TablePagination
-            rowsPerPageOptions={[1, 5, 10]}
+            rowsPerPageOptions={[5, 10, 25]}
             component="div"
             count={listService?.length}
             rowsPerPage={rowsPerPage}

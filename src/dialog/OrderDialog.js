@@ -14,7 +14,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import AppToast from '../myTool/AppToast';
-import { addCarDesAPI, getAllProductAPI } from '../components/services/index';
+import formatMoneyWithDot from '../utils/formatMoney';
+import { addCarDesAPI, getAllProductAPI, getCartDescriptionAPI } from '../components/services/index';
 
 export default function OrderDialog(props) {
   const { openDialog, setOpenDialog, listCart } = props;
@@ -28,6 +29,8 @@ export default function OrderDialog(props) {
   const [isError, setIsError] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [cartId, setCartId] = useState(null);
+  const [listProductInCart, setListProductInCart] = useState([]);
+	const [listProductWaitingConfirm, setListProductWaitingConfirm] = useState([]);
 
   const addProduct = async () => {
     const data = {
@@ -41,16 +44,16 @@ export default function OrderDialog(props) {
         setContentToastHere(res?.data);
         setSeverityHere('success');
         setProductAdd([]);
+				setListProductInCart([]);
+				setListProductWaitingConfirm([]);
         setOpenToastHere(true);
         setOpenDialog(false);
       } else {
-        console.log(res);
         setContentToastHere('Thêm sản phẩm add thất bại');
         setOpenToastHere(true);
         setSeverityHere('error');
       }
     } catch (error) {
-      console.log(error);
       setContentToastHere('Thêm sản phẩm add thất bại');
       setOpenToastHere(true);
       setSeverityHere('error');
@@ -66,13 +69,44 @@ export default function OrderDialog(props) {
     }
   };
 
+  const getCartDescription = async (cartId) => {
+    try {
+      const res = await getCartDescriptionAPI(cartId);
+      if (res?.status === 200) {
+        setListProductInCart(res?.data?.filter((value) => value?.type !== 'Báo giá'));
+        const listProductAdd = res?.data
+          ?.filter((value) => value?.type === 'Báo giá')
+          .map((value) => {
+            const { product, price, quantity, type } = value;
+            return {
+              id: product?.id,
+              name: product?.name,
+              price: price,
+              quantity: quantity,
+              totalPrice: price * quantity,
+              type: type,
+            };
+          });
+					setListProductWaitingConfirm(listProductAdd);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   React.useEffect(() => {
     getAllProduct();
   }, []);
 
+  useEffect(() => {
+    getCartDescription(cartId);
+  }, [cartId]);
+
   const handleClose = () => {
     setCartId(null);
     setProductAdd([]);
+    setListProductInCart([]);
+		setListProductWaitingConfirm([]);
     setOpenDialog(false);
   };
 
@@ -85,6 +119,13 @@ export default function OrderDialog(props) {
       addProduct();
     }
   };
+
+	const getSalePriceOfProduct = (product) => {
+		if(!product) return;
+		const {saleDescriptions, price} = product;
+		if(saleDescriptions.length === 0) return price;
+		return price - price * (saleDescriptions?.[saleDescriptions.length - 1].salePercent / 100);
+	}
 
   const handleAddProductToList = () => {
     if (!productFocus || !quantity) {
@@ -103,14 +144,13 @@ export default function OrderDialog(props) {
           id: productFocus?.id,
           quantity,
           name: productFocus?.name,
-          price: productFocus?.price,
-          productPrice: productFocus?.price,
-          totalPrice: productFocus?.price * quantity,
+          price: getSalePriceOfProduct(productFocus),
+          totalPrice: getSalePriceOfProduct(productFocus) * quantity,
           type: 'Báo giá',
         };
         setProductAdd([...productAdd, data]);
-				setQuantity("");
-				setProductFocus(null);
+        setQuantity('');
+        setProductFocus(null);
       }
     }
   };
@@ -127,12 +167,14 @@ export default function OrderDialog(props) {
             getOptionLabel={(option) => option?.id.toString()}
             sx={{ mt: 2, mb: '60px' }}
             onChange={(e, newValue) => {
-              console.log('newValue', newValue);
               setCartId(newValue?.id);
             }}
             renderInput={(params) => <TextField {...params} label="Cart" />}
           />
-          <DenseTable productAdd={productAdd} />
+          <ExistProductInCart productExist={listProductInCart} title={"Sản phẩm đã trong giỏ hàng"}/>
+          {listProductWaitingConfirm.length > 0 && 
+						(<DenseTable productAdd={listProductWaitingConfirm} title={"Sản phẩm đang chờ chấp nhận"}/>)}
+          <DenseTable productAdd={productAdd} title={"Sản phẩm báo giá"}/>
           <Box
             sx={{
               display: 'flex',
@@ -144,7 +186,7 @@ export default function OrderDialog(props) {
               disablePortal
               id="product"
               options={listProduct}
-							value={productFocus}
+              value={productFocus}
               getOptionLabel={(option) => option?.name.toString()}
               sx={{ width: 500, mr: 2 }}
               onChange={(e, newValue) => {
@@ -157,7 +199,7 @@ export default function OrderDialog(props) {
               label="Quantity"
               type="Number"
               fullWidth
-							value={quantity}
+              value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               required
             />
@@ -200,9 +242,42 @@ export default function OrderDialog(props) {
   );
 }
 
-function DenseTable({ productAdd }) {
+function ExistProductInCart({ productExist, title }) {
   return (
     <TableContainer component={Paper}>
+      <h4 style={{ marginBottom: 20, color: 'red' }}>{title}</h4>
+      <Table sx={{ minWidth: 500 }} size="small" aria-label="a dense table">
+        <TableHead>
+          <TableRow>
+            <TableCell align="center">Mã SP</TableCell>
+            <TableCell align="center">Tên</TableCell>
+            <TableCell align="center">Giá</TableCell>
+            <TableCell align="center">Số lượng</TableCell>
+            <TableCell align="center">Thành tiền</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {productExist?.map((row) => (
+            <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+              <TableCell component="th" scope="row" align="center">
+                {row?.product?.id}
+              </TableCell>
+              <TableCell align="center">{row?.product?.name}</TableCell>
+              <TableCell align="center">{formatMoneyWithDot(row?.price)}</TableCell>
+              <TableCell align="center">{row?.quantity}</TableCell>
+              <TableCell align="center">{formatMoneyWithDot(row?.price * row?.quantity)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
+
+function DenseTable({ productAdd, title }) {
+  return (
+    <TableContainer component={Paper}>
+      <h4 style={{ marginBottom: 20, marginTop: 60, color: 'red' }}>{title}</h4>
       <Table sx={{ minWidth: 500 }} size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
@@ -220,9 +295,9 @@ function DenseTable({ productAdd }) {
                 {row?.id}
               </TableCell>
               <TableCell align="center">{row?.name}</TableCell>
-              <TableCell align="center">{row?.price}</TableCell>
+              <TableCell align="center">{formatMoneyWithDot(row?.price)}</TableCell>
               <TableCell align="center">{row?.quantity}</TableCell>
-              <TableCell align="center">{row?.totalPrice}</TableCell>
+              <TableCell align="center">{formatMoneyWithDot(row?.totalPrice)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
