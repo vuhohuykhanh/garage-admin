@@ -80,6 +80,12 @@ function applySortFilter(array, comparator, query) {
   return stabilizedThis.map((el) => el[0]);
 }
 
+function formatDate(str) {
+	const date = str?.split('T');
+	const day = date?.[0]?.split('-');
+	return `${day?.[2]}/${day?.[1]}/${day?.[0]}`;
+}
+
 export default function Bill() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState('desc');
@@ -138,11 +144,13 @@ export default function Bill() {
   const dataExportExcel = filteredUsers?.map((value) => ({
     CartId: value?.id,
     Owner: value?.customer?.name,
-    CreateAt: value?.createTime,
-    CompleteAt: value?.deleteAt,
-    Price: value?.totalPrice,
-    //ConfirmBy: value?.approvalEmployee
+    CreateAt: formatDate(value?.createTime),
+    CompleteAt: formatDate(value?.deleteAt),
+    // Price: formatMoneyWithDot(value?.totalPrice),				// old
+		Price: value?.totalPrice,
+    ConfirmBy: value?.approvalEmployee?.name
   }));
+
   return (
     <Page title="Product">
       <Container maxWidth="xl">
@@ -150,7 +158,7 @@ export default function Bill() {
           <Typography variant="h4" gutterBottom>
             Bill
           </Typography>
-          <ExportExcel excelData={dataExportExcel} fileName={'Excel Export'} />
+          <ExportExcel excelData={dataExportExcel} fileName={'Thống kê doanh thu Garage'} />
         </Stack>
 
         <Card>
@@ -205,36 +213,15 @@ export default function Bill() {
         </Card>
         <div style={{ marginTop: '150px' }}>
           <span style={{ marginBottom: '50px', display: 'inline-block' }}>
-            <span>Tháng: </span>
+            <span>Month: </span>
             <input
-              style={{ width: '150px', height: '40px', padding: '15px', borderRadius: '8px', border: '1px solid #ccc' }}
+              style={{ width: '200px', height: '40px', padding: '15px', borderRadius: '8px', border: '1px solid #ccc', marginLeft: "15px" }}
               onChange={(e) => setMonthInChart(e?.target?.value)}
               type="month"
               id="startDate"
               value={monthInChart}
             />
           </span>
-          {/*<span style={{ marginBottom: '50px', display: 'inline-block' }}>
-            <span>Ngày bắt đầu: </span>
-            <input
-              style={{ width: '150px', height: '40px', padding: '15px', borderRadius: '8px', border: '1px solid #ccc' }}
-              onChange={(e) => setStartDate(e?.target?.value)}
-              type="date"
-              id="startDate"
-              value={startDate}
-            />
-          </span>*/}
-          {/*<span style={{ marginLeft: '30px' }}>
-            <span>Ngày kết thúc: </span>
-            <input
-              style={{ width: '150px', height: '40px', padding: '15px', borderRadius: '8px', border: '1px solid #ccc' }}
-              onChange={(e) => setEndDate(e?.target?.value)}
-              type="date"
-              id="endDate"
-              value={endDate}
-            />
-          </span>*/}
-          {/*<BarChart data={filteredUsers} startDate={startDate} endDate={endDate} />*/}
           <BarChartMonth data={filteredUsers} monthInChart={monthInChart} />
         </div>
       </Container>
@@ -247,19 +234,13 @@ function Row(props) {
   const {
     id,
     createTime,
-    cart,
+    approvalEmployee,
     totalPrice,
     customer: { name: userName },
     deleteAt: completeAt,
   } = row || {};
   const [open, setOpen] = React.useState(false);
   const [item, setItem] = useState([]);
-
-  function formatDate(str) {
-    const date = str?.split('T');
-    const day = date?.[0]?.split('-');
-    return `${day?.[2]}/${day?.[1]}/${day?.[0]}`;
-  }
 
   const getCartDescription = async (id) => {
     try {
@@ -290,7 +271,7 @@ function Row(props) {
         <TableCell align="center">{formatDate(createTime)}</TableCell>
         <TableCell align="center">{formatDate(completeAt)}</TableCell>
         <TableCell align="center">{formatMoneyWithDot(totalPrice)}</TableCell>
-        <TableCell align="center">{'Vĩnh Trường'}</TableCell>
+        <TableCell align="center">{approvalEmployee?.name}</TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>

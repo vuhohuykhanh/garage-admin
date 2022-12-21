@@ -6,6 +6,7 @@ import {
   API_ADD_NEW_USER,
   API_UPDATE_USER,
   API_DELETE_USER,
+	API_GET_USER_INFORMATION,
   API_GET_ALL_CART,
   API_GET_ALL_CART_DES,
   API_ADD_CART_DES,
@@ -129,15 +130,6 @@ export const addCarDesAPI = async (body) => {
   }
 };
 
-//export const getDeleteCartAPI = async (id) => {
-//  try {
-//    const response = await axios.delete(`${API_DELETE_CART_DES}?id=${id}`);
-//    return response;
-//  } catch (error) {
-//    return error?.response?.data || error;
-//  }
-//};
-
 export const getAllServicesAPI = async () => {
   try {
     const response = await axios.get(`${API_GET_ALL_PRODUCT_BY_PRODUCT_TYPE}?productTypeId=1`);
@@ -147,41 +139,6 @@ export const getAllServicesAPI = async () => {
   }
 };
 
-//export const addNewServiceAPI = async (body) => {
-//  try {
-//    const response = await axios.post(API_ADD_NEW_SERVICE, body);
-//    return response;
-//  } catch (error) {
-//    return error?.response?.data || error;
-//  }
-//};
-
-//export const getUpdateService = async (id, body) => {
-//  try {
-//    const response = await axios.patch(`${API_UPDATE_SERVICE}/${id}`, body);
-//    return response;
-//  } catch (error) {
-//    return error?.response?.data || error;
-//  }
-//};
-
-//export const editServiceAPI = async (body) => {
-//  try {
-//    const response = await axios.patch(API_UPDATE_SERVICE, body);
-//    return response;
-//  } catch (error) {
-//    return error?.response?.data || error;
-//  }
-//};
-
-//export const deleteServiceAPI = async (id) => {
-//  try {
-//    const response = await axios.delete(`${API_DELETE_SERVICE}/${id}`);
-//    return response;
-//  } catch (error) {
-//    return error?.response?.data || error;
-//  }
-//};
 export const getAllProductAndServiceAPI = async () => {
   try {
     const response = await axios.get(API_GET_ALL_PRODUCT);
@@ -286,9 +243,13 @@ export const getAllBillAPI = async () => {
   }
 };
 
-export const createBillAPI = async (id) => {
+export const createBillAPI = async (id, employeeId) => {
   try {
-    const response = await axios.delete(`${API_CREATE_BILL}/${id}`);
+    const response = await axios.delete(`${API_CREATE_BILL}/${id}`, {
+			data: {
+				employeeId: employeeId,
+			}
+		});
     return response;
   } catch (error) {
     return error?.response?.data || error;
@@ -343,3 +304,17 @@ export const getSaleDescriptionAPI = async (id) => {
     return error?.response?.data || error;
   }
 };
+
+//----------------USER INFORMATION----------------
+//API GET_USER_INFO
+export const getUserInfoAPI = async () => {
+	try{
+		const token = JSON.parse(localStorage.getItem('adminInfo'));
+		const response = await axios.get(API_GET_USER_INFORMATION, {
+			headers: {authorization: `Bearer ${token.accessToken}`},
+		})
+		return response;
+	}	catch (error){
+		console.log("error", error);
+	}
+}

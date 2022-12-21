@@ -36,7 +36,7 @@ import Page from '../components/Page';
 import OrderDialog from '../dialog/OrderDialog';
 import Scrollbar from '../components/Scrollbar';
 import Iconify from '../components/Iconify';
-import { UserListHead, UserListToolbar, UserMoreMenu } from '../sections/@dashboard/user';
+import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 
 import KeyboardArrowUpIcon from '@mui/icons-material/ArrowDownward';
 import KeyboardArrowDownIcon from '@mui/icons-material/ArrowUpward';
@@ -47,6 +47,7 @@ import {
   updateStatusAPI,
   createBillAPI,
   getCartDescriptionAPI,
+	getUserInfoAPI,
 } from '../components/services/index';
 
 // ----------------------------------------------------------------------
@@ -76,7 +77,6 @@ function getComparator(order, orderBy) {
 }
 
 function applySortFilter(array, comparator, query) {
-	console.log("array", array);
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -98,8 +98,20 @@ export default function User() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [listCart, setListCart] = useState([]);
   const [listStatus, setListStatus] = useState([]);
+	const [employeeInfo, setEmployeeInfo] = useState();
   //-------------------------------------------------
   const [openDialog, setOpenDialog] = useState(false);
+
+	const getEmployeeInfo = async () => {
+		try{
+			const res = await getUserInfoAPI();
+			if(res?.status === 200 ){
+				setEmployeeInfo(res.data)
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	}
 
   const getAllCart = async () => {
     try {
@@ -120,7 +132,8 @@ export default function User() {
   };
 
   useEffect(() => {
-    getAllCart();
+		getAllCart();
+		getEmployeeInfo();
     getAllStatus();
   }, []);
 
@@ -194,7 +207,7 @@ export default function User() {
                 />
                 <TableBody>
                   {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                    <Row row={row} listStatus={listStatus} getAllCart={getAllCart} />
+                    <Row row={row} listStatus={listStatus} getAllCart={getAllCart} employee={employeeInfo}/>
                   ))}
                   {emptyRows > 0 && (
                     <TableRow style={{ height: 53 * emptyRows }}>
@@ -223,7 +236,7 @@ export default function User() {
   );
 }
 
-const Row = ({ row, listStatus, getAllCart }) => {
+const Row = ({ row, listStatus, getAllCart, employee }) => {
   const {
     id: cartId,
     createTime,
@@ -266,7 +279,7 @@ const Row = ({ row, listStatus, getAllCart }) => {
 
   const createBill = async (cartId) => {
     try {
-      const res = await createBillAPI(cartId);
+      const res = await createBillAPI(cartId, employee?.id);
       if (res?.status === 200) {
         setContentToast(res?.data);
         setSeverity('success');
@@ -331,9 +344,6 @@ const Row = ({ row, listStatus, getAllCart }) => {
       console.log(error);
     }
   };
-
-	console.log("cartDetail", cartDetail)
-	console.log("cartDetailAdd", cartDetailAdd)
 
   const handleClick = () => {
     if (!openDetailCart) getCartDescription(cartId);

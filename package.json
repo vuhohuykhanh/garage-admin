@@ -52,6 +52,7 @@
     "chartjs-plugin-datalabels": "^2.1.0",
     "date-fns": "^2.28.0",
     "dayjs": "^1.11.7",
+    "exceljs": "^4.3.0",
     "file-saver": "^2.0.5",
     "form-data": "^4.0.0",
     "formik": "^2.2.9",
@@ -72,6 +73,7 @@
     "simplebar": "^5.3.6",
     "simplebar-react": "^2.3.6",
     "web-vitals": "^2.1.4",
+    "xlsx-js-style": "^1.2.0",
     "yup": "^0.32.11"
   },
   "devDependencies": {

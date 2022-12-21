@@ -155,6 +155,15 @@ export default function OrderDialog(props) {
     }
   };
 
+	const handleSetQuantity = (quantity) => {
+		console.log("quantity", quantity);
+		if(Number(quantity) > productFocus.quantity) {
+			setQuantity(productFocus?.quantity)
+		} else {
+			setQuantity(quantity)
+		}
+	}
+
   return (
     <div style={{ width: '1000px' }}>
       <Dialog open={openDialog} onClose={handleClose} maxWidth={'1000px'}>
@@ -200,7 +209,7 @@ export default function OrderDialog(props) {
               type="Number"
               fullWidth
               value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
+              onChange={(e) => handleSetQuantity(e.target.value)}
               required
             />
           </Box>

@@ -6,11 +6,13 @@ export const SIGN_IN_ADMIN = `${BASE_URL}/account/sign-in-admin`;
 //Accesory Type
 export const API_GET_ALL_ACCESSORY_TYPE = `${BASE_URL}/accessory-type/get-all`;
 
+//User
 export const API_GET_ALL_USER_MAIN = `${BASE_URL}/user/get-all-user`;
 export const API_GET_ALL_USER = `${BASE_URL}/user/get-all-user`;
 export const API_ADD_NEW_USER = `${BASE_URL}/user/create`;
 export const API_UPDATE_USER = `${BASE_URL}/user/update`;
 export const API_DELETE_USER = `${BASE_URL}/user/delete`;
+export const API_GET_USER_INFORMATION = `${BASE_URL}/user/get-user-info`;
 
 export const API_GET_ALL_CART = `${BASE_URL}/cart/get-all`;
 export const API_GET_ALL_BILL = `${BASE_URL}/cart/get-bill`;

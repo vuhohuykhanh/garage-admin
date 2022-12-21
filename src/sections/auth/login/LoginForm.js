@@ -32,9 +32,7 @@ export default function LoginForm() {
     validationSchema: LoginSchema,
   });
 
-  // console.log('errorMsg', errorMsg)
-
-  const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps } = formik;
+  const { values, isSubmitting, getFieldProps } = formik;
 
   const handleShowPassword = () => {
     setShowPassword((show) => !show);
