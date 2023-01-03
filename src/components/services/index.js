@@ -7,6 +7,8 @@ import {
   API_UPDATE_USER,
   API_DELETE_USER,
 	API_GET_USER_INFORMATION,
+	API_UPDATE_CART,
+	API_DELETE_CART,
   API_GET_ALL_CART,
   API_GET_ALL_CART_DES,
   API_ADD_CART_DES,
@@ -29,6 +31,7 @@ import {
   API_CREATE_SALE_DESCRIPTION,
   API_GET_CART_DESCRIPTION_BY_ID,
   API_GET_CART_BY_USER_ID,
+	API_SEND_EMAIL_CANCEL_ORDER,
 } from './configs';
 
 export const loginAPI = async (body) => {
@@ -103,6 +106,25 @@ export const getCartByUserIdAPI = async (id) => {
   }
 };
 
+export const patchUpdateCartAPI = async ({idCart, formData}) => {
+	try {
+		const response = await axios.patch(`${API_UPDATE_CART}/${idCart}`, formData);
+		return response;
+	} catch (error) {
+		return error?.response?.data || error;
+	}
+}
+
+// hủy cả đơn hàng
+export const deleteCartByIdAPI = async (body) => {
+	try {
+    const response = await axios.delete(`${API_DELETE_CART}?cartId=${body.cartId}&idUser=${body.idUser}`);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};
+
 export const getAllCartDesAPI = async () => {
   try {
     const response = await axios.get(API_GET_ALL_CART_DES);
@@ -147,6 +169,8 @@ export const getAllProductAndServiceAPI = async () => {
     return error?.response?.data || error;
   }
 };
+
+
 
 export const getAllProductAPI = async () => {
   try {
@@ -318,3 +342,12 @@ export const getUserInfoAPI = async () => {
 		console.log("error", error);
 	}
 }
+//---------------SEND EMAIL-------------------
+export const sendEmailAPI = async (body) => {
+  try {
+    const response = await axios.post(API_SEND_EMAIL_CANCEL_ORDER, body);
+    return response;
+  } catch (error) {
+    return error?.response?.data || error;
+  }
+};

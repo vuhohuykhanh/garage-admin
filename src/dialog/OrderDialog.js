@@ -15,27 +15,48 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import AppToast from '../myTool/AppToast';
 import formatMoneyWithDot from '../utils/formatMoney';
-import { addCarDesAPI, getAllProductAPI, getCartDescriptionAPI } from '../components/services/index';
+import {
+  addCarDesAPI,
+  getAllProductAndServiceAPI,
+  getCartDescriptionAPI,
+  getAllServicesAPI,
+} from '../components/services/index';
+
+const ENUM_PRODUCT_TYPE = {
+  PHU_KIEN: 'Phụ kiện',
+  DICH_VU: 'Dịch vụ',
+};
+
+function formatDate(str) {
+	const date = str.split('T');
+	const day = date[0].split('-');
+	return `${day[2]}/${day[1]}/${day[0]}`;
+}
 
 export default function OrderDialog(props) {
   const { openDialog, setOpenDialog, listCart } = props;
   const [listProduct, setListProduct] = useState([]);
-  const [quantity, setQuantity] = useState(null);
-  const [productAdd, setProductAdd] = useState([]);
+  const [listService, setListService] = useState([]);
   const [productFocus, setProductFocus] = useState(null);
+  const [serviceFocus, setServiceFocus] = useState(null);
+  const [quantity, setQuantity] = useState(null);
+  const [price, setPrice] = useState(null);
+  const [additionPrice, setAdditionPrice] = useState(0);
+  const [productAdd, setProductAdd] = useState([]);
   const [openToastHere, setOpenToastHere] = useState(false);
   const [contentToastHere, setContentToastHere] = useState('');
   const [severityHere, setSeverityHere] = useState('');
   const [isError, setIsError] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [cartId, setCartId] = useState(null);
+  const [cartId, setCartId] = useState(0);
   const [listProductInCart, setListProductInCart] = useState([]);
-	const [listProductWaitingConfirm, setListProductWaitingConfirm] = useState([]);
+  const [listProductWaitingConfirm, setListProductWaitingConfirm] = useState([]);
 
   const addProduct = async () => {
     const data = {
       idCartDes: cartId,
       productAdd,
+			...(additionPrice ? {additionPrice}: null)
     };
 
     try {
@@ -44,8 +65,9 @@ export default function OrderDialog(props) {
         setContentToastHere(res?.data);
         setSeverityHere('success');
         setProductAdd([]);
-				setListProductInCart([]);
-				setListProductWaitingConfirm([]);
+        setListProductInCart([]);
+        setListProductWaitingConfirm([]);
+				setAdditionPrice(0);
         setOpenToastHere(true);
         setOpenDialog(false);
       } else {
@@ -60,9 +82,18 @@ export default function OrderDialog(props) {
     }
   };
 
-  const getAllProduct = async () => {
+  const getAllService = async () => {
     try {
-      const res = await getAllProductAPI();
+      const res = await getAllServicesAPI();
+      setListService(res?.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAllAndService = async () => {
+    try {
+      const res = await getAllProductAndServiceAPI();
       setListProduct(res?.data);
     } catch (error) {
       console.log(error);
@@ -87,7 +118,7 @@ export default function OrderDialog(props) {
               type: type,
             };
           });
-					setListProductWaitingConfirm(listProductAdd);
+        setListProductWaitingConfirm(listProductAdd);
       }
     } catch (error) {
       console.log(error);
@@ -95,7 +126,8 @@ export default function OrderDialog(props) {
   };
 
   React.useEffect(() => {
-    getAllProduct();
+    getAllAndService();
+    getAllService();
   }, []);
 
   useEffect(() => {
@@ -106,12 +138,15 @@ export default function OrderDialog(props) {
     setCartId(null);
     setProductAdd([]);
     setListProductInCart([]);
-		setListProductWaitingConfirm([]);
+    setListProductWaitingConfirm([]);
+		setIsError(false);
+    setErrorMsg('');
+		setAdditionPrice(0);
     setOpenDialog(false);
   };
 
   const handleAddProduct = () => {
-    if (!cartId || !productAdd.length) {
+    if ((cartId && !productAdd.length && !additionPrice) || !cartId) {
       setIsError(true);
     } else {
       setIsError(false);
@@ -120,17 +155,17 @@ export default function OrderDialog(props) {
     }
   };
 
-	const getSalePriceOfProduct = (product) => {
-		if(!product) return;
-		const {saleDescriptions, price} = product;
-		if(saleDescriptions.length === 0) return price;
-		return price - price * (saleDescriptions?.[saleDescriptions.length - 1].salePercent / 100);
-	}
+  const getSalePriceOfProduct = (product) => {
+    if (!product) return;
+    const { saleDescriptions, price } = product;
+    if (saleDescriptions.length === 0) return price;
+    return price - price * (saleDescriptions?.[saleDescriptions.length - 1].salePercent / 100);
+  };
 
   const handleAddProductToList = () => {
-    if (!productFocus || !quantity) {
+    if (!price || !productFocus || !quantity) {
       setIsError(true);
-      setErrorMsg('(Product & Quantity)');
+      setErrorMsg('(Product & Quantity & Price & Guarantee)');
     } else {
       setIsError(false);
       setErrorMsg('');
@@ -144,25 +179,25 @@ export default function OrderDialog(props) {
           id: productFocus?.id,
           quantity,
           name: productFocus?.name,
-          price: getSalePriceOfProduct(productFocus),
-          totalPrice: getSalePriceOfProduct(productFocus) * quantity,
+          price: price,
+          totalPrice: price * quantity,
           type: 'Báo giá',
         };
         setProductAdd([...productAdd, data]);
         setQuantity('');
+        setPrice('');
         setProductFocus(null);
       }
     }
   };
 
-	const handleSetQuantity = (quantity) => {
-		console.log("quantity", quantity);
-		if(Number(quantity) > productFocus.quantity) {
-			setQuantity(productFocus?.quantity)
-		} else {
-			setQuantity(quantity)
-		}
-	}
+  const handleSetQuantity = (quantity) => {
+    if (Number(quantity) > productFocus?.quantity) {
+      setQuantity(productFocus?.quantity);
+    } else {
+      setQuantity(quantity);
+    }
+  };
 
   return (
     <div style={{ width: '1000px' }}>
@@ -180,10 +215,11 @@ export default function OrderDialog(props) {
             }}
             renderInput={(params) => <TextField {...params} label="Cart" />}
           />
-          <ExistProductInCart productExist={listProductInCart} title={"Sản phẩm đã trong giỏ hàng"}/>
-          {listProductWaitingConfirm.length > 0 && 
-						(<DenseTable productAdd={listProductWaitingConfirm} title={"Sản phẩm đang chờ chấp nhận"}/>)}
-          <DenseTable productAdd={productAdd} title={"Sản phẩm báo giá"}/>
+          <ExistProductInCart productExist={listProductInCart} title={'Sản phẩm đã trong giỏ hàng'} />
+          {listProductWaitingConfirm.length > 0 && (
+            <DenseTable productAdd={listProductWaitingConfirm} title={'Sản phẩm đang chờ chấp nhận'} />
+          )}
+          <DenseTable productAdd={productAdd} title={'Sản phẩm báo giá'} />
           <Box
             sx={{
               display: 'flex',
@@ -197,17 +233,39 @@ export default function OrderDialog(props) {
               options={listProduct}
               value={productFocus}
               getOptionLabel={(option) => option?.name.toString()}
-              sx={{ width: 500, mr: 2 }}
+              sx={{ width: 300, mr: 2 }}
               onChange={(e, newValue) => {
                 setProductFocus(newValue);
+                setPrice(getSalePriceOfProduct(newValue));
+                if (newValue?.productType?.name === ENUM_PRODUCT_TYPE.DICH_VU) {
+                  setQuantity(1);
+                } else {
+                  setQuantity(null);
+                }
               }}
-              renderInput={(params) => <TextField {...params} label="Product" />}
+              renderInput={(params) => <TextField {...params} label="Accessory" />}
+            />
+            <TextField
+              id="price"
+              label="Price"
+              type="Number"
+              sx={{ mr: 2 }}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              required
             />
             <TextField
               id="quantity"
               label="Quantity"
               type="Number"
-              fullWidth
+							sx={{mr: 2}}
+              disabled={productFocus?.productType?.name === ENUM_PRODUCT_TYPE.DICH_VU ? true : false}
+              InputLabelProps={{
+                shrink: true,
+              }}
               value={quantity}
               onChange={(e) => handleSetQuantity(e.target.value)}
               required
@@ -219,6 +277,27 @@ export default function OrderDialog(props) {
           >
             Thêm
           </Button>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              mt: '60px',
+            }}
+          >
+            <p style={{ width: 200 }}>Phí dịch vụ: </p>
+            <TextField
+              id="additionPrice"
+              label="Addition Price"
+              type="Number"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              fullWidth
+              value={additionPrice}
+              onChange={(e) => setAdditionPrice(e.target.value)}
+              required
+            />
+          </Box>
         </DialogContent>
         <p
           style={{
@@ -252,6 +331,7 @@ export default function OrderDialog(props) {
 }
 
 function ExistProductInCart({ productExist, title }) {
+	console.log("productExist", productExist);
   return (
     <TableContainer component={Paper}>
       <h4 style={{ marginBottom: 20, color: 'red' }}>{title}</h4>
@@ -275,6 +355,7 @@ function ExistProductInCart({ productExist, title }) {
               <TableCell align="center">{formatMoneyWithDot(row?.price)}</TableCell>
               <TableCell align="center">{row?.quantity}</TableCell>
               <TableCell align="center">{formatMoneyWithDot(row?.price * row?.quantity)}</TableCell>
+
             </TableRow>
           ))}
         </TableBody>
@@ -284,6 +365,7 @@ function ExistProductInCart({ productExist, title }) {
 }
 
 function DenseTable({ productAdd, title }) {
+	console.log("productAdd", productAdd)
   return (
     <TableContainer component={Paper}>
       <h4 style={{ marginBottom: 20, marginTop: 60, color: 'red' }}>{title}</h4>

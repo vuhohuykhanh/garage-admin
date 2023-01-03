@@ -1,5 +1,4 @@
 import { filter } from 'lodash';
-import { sentenceCase } from 'change-case';
 import { useState, useEffect } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import Dialog from '@mui/material/Dialog';
@@ -34,9 +33,11 @@ import formatMoneyWithDot from '../utils/formatMoney';
 import AppToast from '../myTool/AppToast';
 import Page from '../components/Page';
 import OrderDialog from '../dialog/OrderDialog';
+import DatePickerDialog from '../dialog/DatePickerDialog';
 import Scrollbar from '../components/Scrollbar';
 import Iconify from '../components/Iconify';
-import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
+import { UserListHead, UserListToolbar, UserBillMoreMenu } from '../sections/@dashboard/user';
+import OrderEditDialog from '../dialog/OrderEditDialog';
 
 import KeyboardArrowUpIcon from '@mui/icons-material/ArrowDownward';
 import KeyboardArrowDownIcon from '@mui/icons-material/ArrowUpward';
@@ -46,8 +47,9 @@ import {
   getAllStatusAPI,
   updateStatusAPI,
   createBillAPI,
+  deleteCartByIdAPI,
   getCartDescriptionAPI,
-	getUserInfoAPI,
+  getUserInfoAPI,
 } from '../components/services/index';
 
 // ----------------------------------------------------------------------
@@ -57,6 +59,8 @@ const TABLE_HEAD = [
   { id: 'owner', label: 'Owner', alignRight: false },
   { id: 'price', label: 'Price', alignRight: false },
   { id: 'createTime', label: 'Create At', alignRight: false },
+  { id: 'doneExpected', label: 'Done Expected', alignRight: false },
+  { id: 'returnDate', label: 'Return day', alignRight: false },
   { id: 'status', label: 'Status', alignRight: false },
 ];
 
@@ -98,20 +102,20 @@ export default function User() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [listCart, setListCart] = useState([]);
   const [listStatus, setListStatus] = useState([]);
-	const [employeeInfo, setEmployeeInfo] = useState();
+  const [employeeInfo, setEmployeeInfo] = useState();
   //-------------------------------------------------
   const [openDialog, setOpenDialog] = useState(false);
 
-	const getEmployeeInfo = async () => {
-		try{
-			const res = await getUserInfoAPI();
-			if(res?.status === 200 ){
-				setEmployeeInfo(res.data)
-			}
-		} catch (error) {
-			console.log(error);
-		}
-	}
+  const getEmployeeInfo = async () => {
+    try {
+      const res = await getUserInfoAPI();
+      if (res?.status === 200) {
+        setEmployeeInfo(res.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const getAllCart = async () => {
     try {
@@ -132,8 +136,8 @@ export default function User() {
   };
 
   useEffect(() => {
-		getAllCart();
-		getEmployeeInfo();
+    getAllCart();
+    getEmployeeInfo();
     getAllStatus();
   }, []);
 
@@ -207,7 +211,7 @@ export default function User() {
                 />
                 <TableBody>
                   {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                    <Row row={row} listStatus={listStatus} getAllCart={getAllCart} employee={employeeInfo}/>
+                    <Row row={row} listStatus={listStatus} getAllCart={getAllCart} employee={employeeInfo} />
                   ))}
                   {emptyRows > 0 && (
                     <TableRow style={{ height: 53 * emptyRows }}>
@@ -240,7 +244,9 @@ const Row = ({ row, listStatus, getAllCart, employee }) => {
   const {
     id: cartId,
     createTime,
-    customer: { id: idUser, name: userName },
+    timeToDone,
+    returnDate,
+    customer: { id: idUser, name: userName, email: userEmail },
     status: { id },
     totalPrice,
   } = row;
@@ -248,7 +254,8 @@ const Row = ({ row, listStatus, getAllCart, employee }) => {
   const [status, setStatus] = useState(id);
   const [afterStatus, setAfterStatus] = useState(id);
   const [open, setOpen] = useState(false);
-  const [open2, setOpen2] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [openToast, setOpenToast] = useState(false);
   const [severity, setSeverity] = useState(false);
   const [contentToast, setContentToast] = useState('');
@@ -256,6 +263,8 @@ const Row = ({ row, listStatus, getAllCart, employee }) => {
   const [openDetailCart, setOpenDetailCart] = useState(false);
   const [cartDetail, setCartDetail] = useState([]);
   const [cartDetailAdd, setCartDetailAdd] = useState([]);
+  const [openModalCancelOrder, setOpenModalCancelOrder] = useState(false);
+  const [openToastDatePicker, setOpenToastDatePicker] = useState(false);
 
   const updateStatus = async (body) => {
     try {
@@ -284,7 +293,7 @@ const Row = ({ row, listStatus, getAllCart, employee }) => {
         setContentToast(res?.data);
         setSeverity('success');
         setOpenToast(true);
-        setOpen2(false);
+        setOpenConfirmDialog(false);
         setTimeout(() => getAllCart(), 1000);
       } else {
         setContentToast('Error happen when create bill');
@@ -296,6 +305,30 @@ const Row = ({ row, listStatus, getAllCart, employee }) => {
       setSeverity('error');
       setOpenToast(true);
       console.log(error);
+    }
+  };
+
+  const handleDeleteCart = async () => {
+    try {
+      const res = await deleteCartByIdAPI({
+        cartId: row?.id,
+        idUser,
+      });
+      if (res?.status === 200) {
+        setContentToast('Hủy đơn hàng thành công');
+        setSeverity('success');
+        setOpenToast(true);
+        setOpenModalCancelOrder(false);
+        setTimeout(() => getAllCart(), 1000);
+      } else {
+        setContentToast('Đã xảy ra lỗi khi hủy đơn hàng');
+        setSeverity('error');
+        setOpenToast(true);
+      }
+    } catch (error) {
+      setContentToast(error);
+      setSeverity('error');
+      setOpenToast(true);
     }
   };
 
@@ -311,7 +344,7 @@ const Row = ({ row, listStatus, getAllCart, employee }) => {
   };
 
   const handleCreateBill = () => {
-    setOpen2(true);
+    setOpenConfirmDialog(true);
   };
 
   const handleClose = () => {
@@ -320,7 +353,7 @@ const Row = ({ row, listStatus, getAllCart, employee }) => {
   };
 
   const handleClose2 = () => {
-    setOpen2(false);
+    setOpenConfirmDialog(false);
   };
 
   const handleOk = () => {
@@ -362,6 +395,8 @@ const Row = ({ row, listStatus, getAllCart, employee }) => {
         <TableCell align="center">{userName}</TableCell>
         <TableCell align="center">{formatMoneyWithDot(totalPrice)}</TableCell>
         <TableCell align="center">{formatDate(createTime)}</TableCell>
+        <TableCell align="center">{timeToDone ? formatDate(timeToDone) : ''}</TableCell>
+        <TableCell align="center">{returnDate ? formatDate(returnDate) : ''}</TableCell>
 
         <TableCell align="center">
           <FormControl style={{ marginTop: '10px' }}>
@@ -379,13 +414,34 @@ const Row = ({ row, listStatus, getAllCart, employee }) => {
             </Select>
           </FormControl>
         </TableCell>
-        {status === 5 && (
-          <TableCell>
+        <TableCell>
+          <UserBillMoreMenu
+            id={id}
+            status={status}
+            entity={row}
+						handleEditCart={() => setOpenEditDialog(true)}
+						handleRefuseCart={() => setOpenToastDatePicker(true)}
+						handleDeleteCart={() => setOpenModalCancelOrder(true)}
+						handleConfirmCart={handleCreateBill}
+          />
+        </TableCell>
+        {/*{status === 5 && (
+          <TableCell align="center">
             <Button variant="text" onClick={handleCreateBill}>
               Xác nhận
             </Button>
           </TableCell>
         )}
+        {status === 1 && (
+          <TableCell align="center">
+            <Button onClick={() => setOpenModalCancelOrder(true)}>Hủy đơn hàng</Button>
+          </TableCell>
+        )}
+        {status === 1 && !returnDate && (
+          <TableCell align="center">
+            <Button onClick={() => setOpenToastDatePicker(true)}>Từ chối đơn hàng</Button>
+          </TableCell>
+        )}*/}
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
@@ -400,7 +456,7 @@ const Row = ({ row, listStatus, getAllCart, employee }) => {
                     <TableRow>
                       <TableCell>Tên sản phẩm</TableCell>
                       <TableCell align="center">Giá</TableCell>
-                      <TableCell align="center">Số lượng</TableCell>
+                      <TableCell v>Số lượng</TableCell>
                       <TableCell align="right">Tổng</TableCell>
                     </TableRow>
                   </TableHead>
@@ -471,7 +527,7 @@ const Row = ({ row, listStatus, getAllCart, employee }) => {
         </DialogActions>
       </Dialog>
       <Dialog
-        open={open2}
+        open={openConfirmDialog}
         onClose={handleClose2}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
@@ -489,6 +545,33 @@ const Row = ({ row, listStatus, getAllCart, employee }) => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog
+        open={openModalCancelOrder}
+        onClose={() => setOpenModalCancelOrder(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{'Xác nhận đơn hoàn thành?'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">Bạn chắc chắn xác hủy đơn hàng {cartId}?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenModalCancelOrder(false)}>Hủy</Button>
+          <Button onClick={handleDeleteCart} autoFocus>
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
+			<OrderEditDialog
+        order={row}
+        openDialog={openEditDialog}
+        setOpenDialog={setOpenEditDialog}
+        getAllService={getAllCart}
+        setContentToast={setContentToast}
+        setSeverity={setSeverity}
+        setOpenToast={setOpenToast}
+      />
+      <DatePickerDialog open={openToastDatePicker} setOpen={setOpenToastDatePicker} email={userEmail} cartId={cartId} />
       <AppToast
         content={contentToast}
         type={0}

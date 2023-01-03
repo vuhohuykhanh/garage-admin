@@ -287,6 +287,7 @@ function Row(props) {
                       <TableCell>Tên sản phẩm</TableCell>
                       <TableCell align="center">Số lượng</TableCell>
                       <TableCell align="right">Giá tiền</TableCell>
+                      <TableCell align="right">Bảo hành đến</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -297,6 +298,7 @@ function Row(props) {
                         </TableCell>
                         <TableCell align="center">{value?.quantity}</TableCell>
                         <TableCell align="right">{formatMoneyWithDot(value?.price * value?.quantity)}</TableCell>
+                        <TableCell align="right">{value?.usageTime ? formatDate(value?.usageTime) : ""}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

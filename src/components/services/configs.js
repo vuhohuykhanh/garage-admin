@@ -6,6 +6,9 @@ export const SIGN_IN_ADMIN = `${BASE_URL}/account/sign-in-admin`;
 //Accesory Type
 export const API_GET_ALL_ACCESSORY_TYPE = `${BASE_URL}/accessory-type/get-all`;
 
+//email
+export const API_SEND_EMAIL_CANCEL_ORDER = `${BASE_URL}/mail/send-mail-cancel-order`;
+
 //User
 export const API_GET_ALL_USER_MAIN = `${BASE_URL}/user/get-all-user`;
 export const API_GET_ALL_USER = `${BASE_URL}/user/get-all-user`;
@@ -16,7 +19,9 @@ export const API_GET_USER_INFORMATION = `${BASE_URL}/user/get-user-info`;
 
 export const API_GET_ALL_CART = `${BASE_URL}/cart/get-all`;
 export const API_GET_ALL_BILL = `${BASE_URL}/cart/get-bill`;
+export const API_UPDATE_CART = `${BASE_URL}/cart/update`;
 export const API_UPDATE_STATUS = `${BASE_URL}/cart/update-status`;
+export const API_DELETE_CART = `${BASE_URL}/cart/delete`;
 export const API_CREATE_BILL = `${BASE_URL}/cart/delete-soft`;
 export const API_GET_CART_BY_USER_ID = `${BASE_URL}/cart/get-cart-by-user-id`;
 
