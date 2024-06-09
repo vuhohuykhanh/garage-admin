@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = 'https://slightly-renewed-satyr.ngrok-free.app/api';
 
 // Sign in
 export const SIGN_IN_ADMIN = `${BASE_URL}/account/sign-in-admin`;
